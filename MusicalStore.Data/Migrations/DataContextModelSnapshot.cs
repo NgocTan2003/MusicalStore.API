@@ -109,6 +109,23 @@ namespace MusicalStore.Data.Migrations
                     b.ToTable("Categories");
                 });
 
+            modelBuilder.Entity("MusicalStore.Data.Entities.Demo", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Demos");
+                });
+
             modelBuilder.Entity("MusicalStore.Data.Entities.FeedBack", b =>
                 {
                     b.Property<Guid>("FeedBackID")

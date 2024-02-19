@@ -12,8 +12,8 @@ using MusicalStore.Data.EF;
 namespace MusicalStore.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20240216144805_Init")]
-    partial class Init
+    [Migration("20240217095813_addtable")]
+    partial class addtable
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -109,6 +109,23 @@ namespace MusicalStore.Data.Migrations
                     b.HasKey("CategoryID");
 
                     b.ToTable("Categories");
+                });
+
+            modelBuilder.Entity("MusicalStore.Data.Entities.Demo", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Demos");
                 });
 
             modelBuilder.Entity("MusicalStore.Data.Entities.FeedBack", b =>

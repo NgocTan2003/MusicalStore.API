@@ -9,12 +9,13 @@ namespace MusicalStore.Application.Repositories.Interfaces
 {
     public interface IUserRepository
     {
-        Task<List<User>> GetAll();
-        Task<User> GetById(Guid id);
-        Task<User> GetByUsername(string username);
-        Task<User> GetByEmail(string email);
-        Task<Guid> Create(User user);
-        Task<int> Update(User user);
-        Task<int> Delete(User user);
+        Task<List<User>> GetAllUser();
+        Task<User> GetUserById(Guid id);
+        Task<bool> UserExists(Guid id);
+        Task<User> GetUserByUsername(string username);
+        Task<User> GetUserByEmail(string email);
+        Task<Guid> CreateUser(User user);
+        Task<bool> UpdateUser(User user);
+        Task<bool> DeleteUser(User user);
     }
 }

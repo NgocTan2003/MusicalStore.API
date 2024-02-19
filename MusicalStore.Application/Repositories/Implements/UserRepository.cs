@@ -19,51 +19,70 @@ namespace MusicalStore.Application.Repositories.Implements
             _dataContext = dataContext;
         }
 
-        public async Task<List<User>> GetAll()
+        public async Task<List<User>> GetAllUser()
         {
-            var result = new List<User>();
-            try
-            {
-                result = await _dataContext.Users.ToListAsync();
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Lỗii");
-            }
+            var result = await _dataContext.Users.ToListAsync();
             return result;
-
         }
 
-        public async Task<User?> GetById(Guid id)
+        public async Task<User?> GetUserById(Guid id)
         {
             return await _dataContext.Users.FindAsync(id);
         }
 
-        public async Task<User?> GetByUsername(string username)
+        public async Task<bool> UserExists(Guid id)
+        {
+            var result = await _dataContext.Users.FirstOrDefaultAsync(u => u.UserID == id);
+            return result != null;
+        }
+
+        public async Task<User?> GetUserByUsername(string username)
         {
             return _dataContext.Users.Where(e => e.UserName == username).FirstOrDefault();
         }
 
-        public async Task<User?> GetByEmail(string email)
+        public async Task<User?> GetUserByEmail(string email)
         {
             return _dataContext.Users.Where(e => e.Email == email).FirstOrDefault();
         }
 
-        public async Task<Guid> Create(User user)
+        public async Task<Guid> CreateUser(User user)
         {
             _dataContext.Users.Add(user);
             await _dataContext.SaveChangesAsync();
             return user.UserID;
         }
 
-        public Task<int> Update(User user)
+        public async Task<bool> UpdateUser(User user)
         {
-            throw new NotImplementedException();
+            bool isUpdate = false;
+
+            _dataContext.Users.Update(user);
+            int affectedRows = await _dataContext.SaveChangesAsync();
+
+            if (affectedRows > 0)
+            {
+                isUpdate = true;
+            }
+
+            return isUpdate;
         }
 
-        public Task<int> Delete(User user)
+        public async Task<bool> DeleteUser(User user)
         {
-            throw new NotImplementedException();
+            bool isDeleted = false;
+
+            _dataContext.Users.Remove(user);
+            int affectedRows = await _dataContext.SaveChangesAsync();
+
+            if (affectedRows > 0)
+            {
+                isDeleted = true;
+            }
+
+            return isDeleted;
         }
+
+
     }
 }

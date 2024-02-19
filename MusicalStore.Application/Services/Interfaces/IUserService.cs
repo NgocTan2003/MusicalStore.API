@@ -1,4 +1,5 @@
-﻿using MusicalStore.Data.Entities;
+﻿using MusicalStore.Common.ResponseBase;
+using MusicalStore.Data.Entities;
 using MusicalStore.Dtos.Users;
 using System;
 using System.Collections.Generic;
@@ -10,12 +11,13 @@ namespace MusicalStore.Application.Services.Interfaces
 {
     public interface IUserService
     {
-        Task<List<User>> GetAll();
-        Task<User> GetById(Guid id);
-        Task<User> GetByUsername(string username);
-        Task<User> GetByEmail(string email);
-        Task<Guid> Create(User user);
-        Task<int> Update(User user);
-        Task<int> Delete(User user);
+        Task<List<UserDto>> GetAllUser();
+        Task<UserDto> GetUserById(Guid id);
+        Task<bool> UserExists(Guid id);
+        Task<User> GetUserByUsername(string username);
+        Task<User> GetUserByEmail(string email);
+        Task<ResponseMessage> CreateUser(RegisterRequest request);
+        Task<ResponseMessage> UpdateUser(UpdateUser request);
+        Task<ResponseMessage> DeleteUser(Guid id);
     }
 }
