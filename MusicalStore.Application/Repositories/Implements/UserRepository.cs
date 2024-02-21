@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using MusicalStore.Application.Repositories.Interfaces;
+using MusicalStore.Application.Repositories.RepositoryBase;
 using MusicalStore.Data.EF;
 using MusicalStore.Data.Entities;
 using System;
@@ -7,33 +8,17 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static MusicalStore.Application.Repositories.RepositoryBase.IRepositoryBase;
 
 namespace MusicalStore.Application.Repositories.Implements
 {
-    public class UserRepository : IUserRepository
+    public class UserRepository : RepositoryBase<User>, IUserRepository 
     {
         private readonly DataContext _dataContext;
 
-        public UserRepository(DataContext dataContext)
+        public UserRepository(DataContext dataContext) : base(dataContext)
         {
             _dataContext = dataContext;
-        }
-
-        public async Task<List<User>> GetAllUser()
-        {
-            var result = await _dataContext.Users.ToListAsync();
-            return result;
-        }
-
-        public async Task<User?> GetUserById(Guid id)
-        {
-            return await _dataContext.Users.FindAsync(id);
-        }
-
-        public async Task<bool> UserExists(Guid id)
-        {
-            var result = await _dataContext.Users.FirstOrDefaultAsync(u => u.UserID == id);
-            return result != null;
         }
 
         public async Task<User?> GetUserByUsername(string username)
@@ -46,42 +31,60 @@ namespace MusicalStore.Application.Repositories.Implements
             return _dataContext.Users.Where(e => e.Email == email).FirstOrDefault();
         }
 
-        public async Task<Guid> CreateUser(User user)
-        {
-            _dataContext.Users.Add(user);
-            await _dataContext.SaveChangesAsync();
-            return user.UserID;
-        }
 
-        public async Task<bool> UpdateUser(User user)
-        {
-            bool isUpdate = false;
+        //public async Task<bool> UserExists(Guid id)
+        //{
+        //    var result = await _dataContext.Users.FirstOrDefaultAsync(u => u.UserID == id);
+        //    return result != null;
+        //}
 
-            _dataContext.Users.Update(user);
-            int affectedRows = await _dataContext.SaveChangesAsync();
+        //public async Task<List<User>> GetAllUser()
+        //{
+        //    var result = await _dataContext.Users.ToListAsync();
+        //    return result;
+        //}
 
-            if (affectedRows > 0)
-            {
-                isUpdate = true;
-            }
+        //public async Task<User?> GetUserById(Guid id)
+        //{
+        //    return await _dataContext.Users.FindAsync(id);
+        //}
 
-            return isUpdate;
-        }
+        //public async Task<Guid> CreateUser(User user)
+        //{
+        //    _dataContext.Users.Add(user);
+        //    await _dataContext.SaveChangesAsync();
+        //    return user.UserID;
+        //}
 
-        public async Task<bool> DeleteUser(User user)
-        {
-            bool isDeleted = false;
+        //public async Task<bool> UpdateUser(User user)
+        //{
+        //    bool isUpdate = false;
 
-            _dataContext.Users.Remove(user);
-            int affectedRows = await _dataContext.SaveChangesAsync();
+        //    _dataContext.Users.Update(user);
+        //    int affectedRows = await _dataContext.SaveChangesAsync();
 
-            if (affectedRows > 0)
-            {
-                isDeleted = true;
-            }
+        //    if (affectedRows > 0)
+        //    {
+        //        isUpdate = true;
+        //    }
 
-            return isDeleted;
-        }
+        //    return isUpdate;
+        //}
+
+        //public async Task<bool> DeleteUser(User user)
+        //{
+        //    bool isDeleted = false;
+
+        //    _dataContext.Users.Remove(user);
+        //    int affectedRows = await _dataContext.SaveChangesAsync();
+
+        //    if (affectedRows > 0)
+        //    {
+        //        isDeleted = true;
+        //    }
+
+        //    return isDeleted;
+        //}
 
 
     }

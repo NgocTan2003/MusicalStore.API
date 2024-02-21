@@ -14,8 +14,8 @@ namespace MusicalStore.Application.Services.Interfaces
         Task<List<UserDto>> GetAllUser();
         Task<UserDto> GetUserById(Guid id);
         Task<bool> UserExists(Guid id);
-        Task<User> GetUserByUsername(string username);
-        Task<User> GetUserByEmail(string email);
+        Task<User?> GetUserByUsername(string username);
+        Task<User?> GetUserByEmail(string email);
         Task<ResponseMessage> CreateUser(RegisterRequest request);
         Task<ResponseMessage> UpdateUser(UpdateUser request);
         Task<ResponseMessage> DeleteUser(Guid id);

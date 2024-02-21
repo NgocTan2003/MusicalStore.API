@@ -33,36 +33,35 @@ namespace MusicalStore.Application.Services.Implements
 
         public async Task<List<UserDto>> GetAllUser()
         {
-            var users = await _userRepository.GetAllUser();
+            var users = await _userRepository.GetAll().ToListAsync();
             var usersDto = _mapper.Map<List<UserDto>>(users);
             return usersDto;
         }
 
         public async Task<UserDto> GetUserById(Guid id)
         {
-            var users = await _userRepository.GetUserById(id);
-            var usersDto = _mapper.Map<UserDto>(users);
-            return usersDto;
+            var user = await _userRepository.FindById(id);
+            var userDto = _mapper.Map<UserDto>(user);
+            return userDto;
         }
 
         public async Task<bool> UserExists(Guid id)
         {
-            return await _userRepository.UserExists(id);
+            return await _userRepository.Exists(id);
         }
 
-        public Task<User> GetUserByEmail(string email)
+        public async Task<User> GetUserByEmail(string email)
         {
-            throw new NotImplementedException();
+            return await _userRepository.GetUserByEmail(email);
         }
 
-        public Task<User> GetUserByUsername(string username)
+        public async Task<User> GetUserByUsername(string username)
         {
-            throw new NotImplementedException();
+            return await _userRepository.GetUserByUsername(username);
         }
 
         public async Task<ResponseMessage> CreateUser(RegisterRequest request)
         {
-
             ResponseMessage responseMessage = new();
             var findUserName = await _userRepository.GetUserByUsername(request.UserName);
             var findEmail = await _userRepository.GetUserByEmail(request.Email);
@@ -74,21 +73,23 @@ namespace MusicalStore.Application.Services.Implements
             }
             else
             {
-                var user = new User()
+                var user = new User();
+                user.UserID = Guid.NewGuid();
+                user.UserName = request.UserName;
+                user.PassWord = request.PassWord;
+                user.Email = request.Email;
+                user.FullName = request.FullName;
+                user.Gender = request.Gender;
+                user.PhoneNumber = request.PhoneNumber;
+                if (request.UploadFile != null)
                 {
-                    UserID = Guid.NewGuid(),
-                    UserName = request.UserName,
-                    PassWord = request.PassWord,
-                    Email = request.Email,
-                    FullName = request.FullName,
-                    Gender = request.Gender,
-                    PhoneNumber = request.PhoneNumber,
-                    Avatar = await UploadImage(request.UploadFile),
-                    DateCreated = DateTime.Now
-                };
+                    user.Avatar = await UploadImage(request.UploadFile);
+                }
+                user.DateCreated = DateTime.Now;
 
-                var create = await _userRepository.CreateUser(user);
-                if (create == user.UserID)
+
+                var create = await _userRepository.Create(user);
+                if (create > 0)
                 {
                     responseMessage.Message = "Đăng kí thành công";
                     responseMessage.StatusCode = 200;
@@ -100,7 +101,39 @@ namespace MusicalStore.Application.Services.Implements
                 }
             }
             return responseMessage;
+        }
 
+        public async Task<ResponseMessage> UpdateUser(UpdateUser request)
+        {
+            var find = await _userRepository.FindById(request.UserID);
+
+            find.PassWord = request.PassWord;
+            find.Email = request.Email;
+            find.FullName = request.FullName;
+            find.Gender = request.Gender;
+            find.PhoneNumber = request.PhoneNumber;
+            find.UpdateBy = request.UpdateBy;
+            find.ModifiedDate = DateTime.Now;
+
+            if (request.UploadFile != null)
+            {
+                find.Avatar = await UploadImage(request.UploadFile);
+            }
+
+            var update = await _userRepository.Update(find);
+
+            ResponseMessage responseMessage = new();
+            if (update > 0)
+            {
+                responseMessage.Message = "Cập nhật thông tin thành công";
+                responseMessage.StatusCode = 200;
+            }
+            else
+            {
+                responseMessage.Message = "Cập nhật thông tin thất bại";
+                responseMessage.StatusCode = 500;
+            }
+            return responseMessage;
         }
 
         public async Task<string> UploadImage(UploadFile request)
@@ -110,7 +143,7 @@ namespace MusicalStore.Application.Services.Implements
 
             string folder = _webHostEnvironment.WebRootPath + imageFolder;
             var randomfile = System.IO.Path.GetRandomFileName();
-            var nameImage = $"{randomfile}.jpg";
+            var nameImage = $"{request.FileName}.jpg";
 
             if (!Directory.Exists(folder))
             {
@@ -129,44 +162,11 @@ namespace MusicalStore.Application.Services.Implements
             return responseimage;
         }
 
-        public async Task<ResponseMessage> UpdateUser(UpdateUser request)
-        {
-            var find = await _userRepository.GetUserById(request.UserID);
-
-            find.PassWord = request.PassWord;
-            find.Email = request.Email;
-            find.FullName = request.FullName;
-            find.Gender = request.Gender;
-            find.PhoneNumber = request.PhoneNumber;
-            find.UpdateBy = request.UserName;
-            find.ModifiedDate = DateTime.Now;
-
-            if (request.UploadFile != null)
-            {
-                find.Avatar = await UploadImage(request.UploadFile);
-            }
-
-            var update = await _userRepository.UpdateUser(find);
-
-            ResponseMessage responseMessage = new();
-            if (update)
-            {
-                responseMessage.Message = "Cập nhật thông tin thành công";
-                responseMessage.StatusCode = 200;
-            }
-            else
-            {
-                responseMessage.Message = "Cập nhật thông tin thất bại";
-                responseMessage.StatusCode = 500;
-            }
-            return responseMessage;
-        }
-
         public async Task<ResponseMessage> DeleteUser(Guid id)
         {
             ResponseMessage responseMessage = new();
 
-            var exists = await _userRepository.UserExists(id);
+            var exists = await _userRepository.Exists(id);
 
             if (!exists)
             {
@@ -177,11 +177,9 @@ namespace MusicalStore.Application.Services.Implements
             }
             else
             {
-                var userDto = await _userRepository.GetUserById(id);
-                var user = _mapper.Map<User>(userDto);
-                var delete = await _userRepository.DeleteUser(user);
+                var delete = await _userRepository.Delete(id);
 
-                if (delete)
+                if (delete > 0)
                 {
                     responseMessage.Message = "Xóa người dùng thành công";
                     responseMessage.StatusCode = 200;

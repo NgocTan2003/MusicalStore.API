@@ -31,8 +31,8 @@ namespace MusicalStore.Dtos.Users
         public UploadFile? UploadFile { get; set; }
 
         public string? CreateBy { get; set; }
-        public DateTime DateCreated { get; set; }
+        public DateTime? DateCreated { get; set; }
         public string? UpdateBy { get; set; }
-        public DateTime ModifiedDate { get; set; }
+        public DateTime? ModifiedDate { get; set; }
     }
 }
