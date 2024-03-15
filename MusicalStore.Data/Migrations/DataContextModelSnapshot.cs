@@ -22,6 +22,226 @@ namespace MusicalStore.Data.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder, 1L, 1);
 
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("ConcurrencyStamp")
+                        .IsConcurrencyToken()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("NormalizedName")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("NormalizedName")
+                        .IsUnique()
+                        .HasDatabaseName("RoleNameIndex")
+                        .HasFilter("[NormalizedName] IS NOT NULL");
+
+                    b.ToTable("AspNetRoles", (string)null);
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<string>("ClaimType")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ClaimValue")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("RoleId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RoleId");
+
+                    b.ToTable("AspNetRoleClaims", (string)null);
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<string>("ClaimType")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ClaimValue")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("AspNetUserClaims", (string)null);
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
+                {
+                    b.Property<string>("LoginProvider")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("ProviderKey")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("ProviderDisplayName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("LoginProvider", "ProviderKey");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("AspNetUserLogins", (string)null);
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<string>", b =>
+                {
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("RoleId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("UserId", "RoleId");
+
+                    b.HasIndex("RoleId");
+
+                    b.ToTable("AspNetUserRoles", (string)null);
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
+                {
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("LoginProvider")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Value")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("UserId", "LoginProvider", "Name");
+
+                    b.ToTable("AspNetUserTokens", (string)null);
+                });
+
+            modelBuilder.Entity("MusicalStore.Data.Entities.AppUser", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("AccessFailedCount")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Avatar")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ConcurrencyStamp")
+                        .IsConcurrencyToken()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CreateBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("DateCreated")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Email")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<bool>("EmailConfirmed")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("FullName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Gender")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("LockoutEnabled")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTimeOffset?>("LockoutEnd")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<DateTime>("ModifiedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("NormalizedEmail")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("NormalizedUserName")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("PasswordHash")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PhoneNumber")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("PhoneNumberConfirmed")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("SecurityStamp")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("TwoFactorEnabled")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("UpdateBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UserName")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("NormalizedEmail")
+                        .HasDatabaseName("EmailIndex");
+
+                    b.HasIndex("NormalizedUserName")
+                        .IsUnique()
+                        .HasDatabaseName("UserNameIndex")
+                        .HasFilter("[NormalizedUserName] IS NOT NULL");
+
+                    b.ToTable("AspNetUsers", (string)null);
+                });
+
             modelBuilder.Entity("MusicalStore.Data.Entities.Cart", b =>
                 {
                     b.Property<Guid>("CartID")
@@ -34,18 +254,22 @@ namespace MusicalStore.Data.Migrations
                     b.Property<DateTime>("DateCreated")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("Id")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime>("ModifiedDate")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("UpdateBy")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid>("UserID")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("appUserId")
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("CartID");
 
-                    b.HasIndex("UserID");
+                    b.HasIndex("appUserId");
 
                     b.ToTable("Carts");
                 });
@@ -109,23 +333,6 @@ namespace MusicalStore.Data.Migrations
                     b.ToTable("Categories");
                 });
 
-            modelBuilder.Entity("MusicalStore.Data.Entities.Demo", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Demos");
-                });
-
             modelBuilder.Entity("MusicalStore.Data.Entities.FeedBack", b =>
                 {
                     b.Property<Guid>("FeedBackID")
@@ -141,6 +348,10 @@ namespace MusicalStore.Data.Migrations
                     b.Property<DateTime>("DateCreated")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("Id")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime>("ModifiedDate")
                         .HasColumnType("datetime2");
 
@@ -153,16 +364,43 @@ namespace MusicalStore.Data.Migrations
                     b.Property<string>("UpdateBy")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid>("UserID")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("appUserId")
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("FeedBackID");
 
                     b.HasIndex("ProductID");
 
-                    b.HasIndex("UserID");
+                    b.HasIndex("appUserId");
 
                     b.ToTable("FeedBacks");
+                });
+
+            modelBuilder.Entity("MusicalStore.Data.Entities.Function", b =>
+                {
+                    b.Property<Guid>("FunctionId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("CreateBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("DateCreated")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("FunctionName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("ModifiedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UpdateBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("FunctionId");
+
+                    b.ToTable("Functions");
                 });
 
             modelBuilder.Entity("MusicalStore.Data.Entities.Gallery", b =>
@@ -212,14 +450,19 @@ namespace MusicalStore.Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("ModifiedDate")
-                        .HasColumnType("datetime2");
+                    b.Property<string>("Id")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("OrderDate")
+                    b.Property<DateTime>("ModifiedDate")
                         .HasColumnType("datetime2");
 
                     b.Property<int>("OrderStatus")
                         .HasColumnType("int");
+
+                    b.Property<string>("PhoneNumber")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Receiver")
                         .IsRequired()
@@ -231,12 +474,12 @@ namespace MusicalStore.Data.Migrations
                     b.Property<string>("UpdateBy")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid>("UserID")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("appUserId")
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("OrderID");
 
-                    b.HasIndex("UserID");
+                    b.HasIndex("appUserId");
 
                     b.ToTable("Orders");
                 });
@@ -275,6 +518,38 @@ namespace MusicalStore.Data.Migrations
                     b.HasIndex("ProductID");
 
                     b.ToTable("OrderDetails");
+                });
+
+            modelBuilder.Entity("MusicalStore.Data.Entities.Permission", b =>
+                {
+                    b.Property<Guid>("PermissionId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("CanCreate")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("CanDelete")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("CanRead")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("CanUpdate")
+                        .HasColumnType("bit");
+
+                    b.Property<Guid>("FunctionId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("RoleName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("PermissionId");
+
+                    b.HasIndex("FunctionId");
+
+                    b.ToTable("Permissions");
                 });
 
             modelBuilder.Entity("MusicalStore.Data.Entities.Product", b =>
@@ -326,67 +601,64 @@ namespace MusicalStore.Data.Migrations
                     b.ToTable("Products");
                 });
 
-            modelBuilder.Entity("MusicalStore.Data.Entities.User", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
-                    b.Property<Guid>("UserID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
+                        .WithMany()
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
 
-                    b.Property<string>("Avatar")
-                        .HasColumnType("nvarchar(max)");
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
+                {
+                    b.HasOne("MusicalStore.Data.Entities.AppUser", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
 
-                    b.Property<string>("CreateBy")
-                        .HasColumnType("nvarchar(max)");
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
+                {
+                    b.HasOne("MusicalStore.Data.Entities.AppUser", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
 
-                    b.Property<DateTime>("DateCreated")
-                        .HasColumnType("datetime2");
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<string>", b =>
+                {
+                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
+                        .WithMany()
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.HasOne("MusicalStore.Data.Entities.AppUser", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
 
-                    b.Property<string>("FullName")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<int>("Gender")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("ModifiedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("PassWord")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("PhoneNumber")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("UpdateBy")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("UserName")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.HasKey("UserID");
-
-                    b.ToTable("Users");
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
+                {
+                    b.HasOne("MusicalStore.Data.Entities.AppUser", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("MusicalStore.Data.Entities.Cart", b =>
                 {
-                    b.HasOne("MusicalStore.Data.Entities.User", "User")
+                    b.HasOne("MusicalStore.Data.Entities.AppUser", "appUser")
                         .WithMany()
-                        .HasForeignKey("UserID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("appUserId");
 
-                    b.Navigation("User");
+                    b.Navigation("appUser");
                 });
 
             modelBuilder.Entity("MusicalStore.Data.Entities.CartItem", b =>
@@ -416,15 +688,13 @@ namespace MusicalStore.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("MusicalStore.Data.Entities.User", "User")
+                    b.HasOne("MusicalStore.Data.Entities.AppUser", "appUser")
                         .WithMany("FeedBacks")
-                        .HasForeignKey("UserID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("appUserId");
 
                     b.Navigation("Product");
 
-                    b.Navigation("User");
+                    b.Navigation("appUser");
                 });
 
             modelBuilder.Entity("MusicalStore.Data.Entities.Gallery", b =>
@@ -440,13 +710,11 @@ namespace MusicalStore.Data.Migrations
 
             modelBuilder.Entity("MusicalStore.Data.Entities.Order", b =>
                 {
-                    b.HasOne("MusicalStore.Data.Entities.User", "User")
+                    b.HasOne("MusicalStore.Data.Entities.AppUser", "appUser")
                         .WithMany("Orders")
-                        .HasForeignKey("UserID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("appUserId");
 
-                    b.Navigation("User");
+                    b.Navigation("appUser");
                 });
 
             modelBuilder.Entity("MusicalStore.Data.Entities.OrderDetail", b =>
@@ -468,6 +736,17 @@ namespace MusicalStore.Data.Migrations
                     b.Navigation("Product");
                 });
 
+            modelBuilder.Entity("MusicalStore.Data.Entities.Permission", b =>
+                {
+                    b.HasOne("MusicalStore.Data.Entities.Function", "Function")
+                        .WithMany()
+                        .HasForeignKey("FunctionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Function");
+                });
+
             modelBuilder.Entity("MusicalStore.Data.Entities.Product", b =>
                 {
                     b.HasOne("MusicalStore.Data.Entities.Category", "Category")
@@ -477,6 +756,13 @@ namespace MusicalStore.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("Category");
+                });
+
+            modelBuilder.Entity("MusicalStore.Data.Entities.AppUser", b =>
+                {
+                    b.Navigation("FeedBacks");
+
+                    b.Navigation("Orders");
                 });
 
             modelBuilder.Entity("MusicalStore.Data.Entities.Cart", b =>
@@ -503,13 +789,6 @@ namespace MusicalStore.Data.Migrations
                     b.Navigation("Galleries");
 
                     b.Navigation("OrderDetails");
-                });
-
-            modelBuilder.Entity("MusicalStore.Data.Entities.User", b =>
-                {
-                    b.Navigation("FeedBacks");
-
-                    b.Navigation("Orders");
                 });
 #pragma warning restore 612, 618
         }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MusicalStore.Common.Enums;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace MusicalStore.Dtos.Categories
 {
-    public class CategoryDto
+    public class CategoryDto : DateCommon
     {
         public Guid CategoryID { get; set; }
         public string CategoryName { get; set; }

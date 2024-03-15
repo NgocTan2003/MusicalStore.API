@@ -1,5 +1,6 @@
 ﻿using MusicalStore.Application.Repositories.RepositoryBase;
 using MusicalStore.Data.Entities;
+using MusicalStore.Dtos.Users;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,16 +10,16 @@ using static MusicalStore.Application.Repositories.RepositoryBase.IRepositoryBas
 
 namespace MusicalStore.Application.Repositories.Interfaces
 {
-    public interface IUserRepository : IRepositoryBase<User>
+    public interface IUserRepository
     {
-        Task<User?> GetUserByUsername(string username);
-        Task<User?> GetUserByEmail(string email);
-
-        //Task<bool> UserExists(Guid id);
-        //Task<List<User>> GetAllUser();
-        //Task<User> GetUserById(Guid id);
-        //Task<Guid> CreateUser(User user);
-        //Task<bool> UpdateUser(User user);
-        //Task<bool> DeleteUser(User user);
+        Task<List<AppUser>> GetAllUser();
+        Task<AppUser> GetUserById(string id);
+        Task<AppUser?> GetUserByUsername(string username);
+        Task<AppUser?> GetUserByEmail(string email);
+        Task<bool> AddRole(AppUser user, IList<string> Roles);
+        Task<IList<string>> GetAllRoleByName(string UserName);
+        Task<bool> CreateUser(AppUser user, string password);
+        Task<bool> UpdateUser(AppUser user);
+        Task<bool> DeleteUser(AppUser user);
     }
 }

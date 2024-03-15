@@ -11,13 +11,16 @@ namespace MusicalStore.Application.Services.Interfaces
 {
     public interface IUserService
     {
+        Task<TokenResponse> Authentication(AuthenticationRequest request);
         Task<List<UserDto>> GetAllUser();
-        Task<UserDto> GetUserById(Guid id);
-        Task<bool> UserExists(Guid id);
-        Task<User?> GetUserByUsername(string username);
-        Task<User?> GetUserByEmail(string email);
+        Task<UserDto> GetUserById(string id);
+        Task<UserDto?> GetUserByUsername(string username);
+        Task<UserDto?> GetUserByEmail(string email);
+        Task<IList<string>> GetAllRoleByName(string UserName);
         Task<ResponseMessage> CreateUser(RegisterRequest request);
         Task<ResponseMessage> UpdateUser(UpdateUser request);
-        Task<ResponseMessage> DeleteUser(Guid id);
+        Task<ResponseMessage> DeleteUser(string id);
+
+
     }
 }

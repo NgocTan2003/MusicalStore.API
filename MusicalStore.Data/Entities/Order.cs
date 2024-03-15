@@ -1,4 +1,5 @@
-﻿using MusicalStore.Data.Enums;
+﻿using MusicalStore.Common.Enums;
+using MusicalStore.Data.Enums;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -9,26 +10,20 @@ using System.Threading.Tasks;
 
 namespace MusicalStore.Data.Entities
 {
-    public class Order
+    public class Order : DateCommon
     {
         [Key]
         public Guid OrderID { get; set; }
-
-        [ForeignKey("UserID")]
-        public Guid UserID { get; set; }
-
-        [Required]
-        public DateTime OrderDate { get; set; }
-
+        [ForeignKey("Id")]
+        public string Id { get; set; }
         [Required]
         public string Receiver { get; set; }
-
+        [Required]
+        public string PhoneNumber { get; set; }
         [Required]
         public string DeliveryAddress { get; set; }
-
         [Required]
         public OrderStatus OrderStatus { get; set; }
-
         [Required]
         public double TotalMoney { get; set; }
 
@@ -42,8 +37,7 @@ namespace MusicalStore.Data.Entities
         public DateTime ModifiedDate { get; set; }
 
 
-
-        public User User { get; set; }
+        public AppUser appUser { get; set; }
 
         public ICollection<OrderDetail> OrderDetails { get; set; }
     }

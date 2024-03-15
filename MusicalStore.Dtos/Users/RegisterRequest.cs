@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace MusicalStore.Dtos.Users
 {
-    public class RegisterRequest
+    public class RegisterRequest : DateCommon
     {
         [Required(ErrorMessage = "Username is required")]
         [StringLength(100, MinimumLength = 6, ErrorMessage = "Username must be between 6 and 100 characters")]
@@ -29,10 +29,12 @@ namespace MusicalStore.Dtos.Users
         [RegularExpression(@"^\+?\d{10,12}$", ErrorMessage = "Invalid phone number")]
         public string PhoneNumber { get; set; } = "";
         public UploadFile? UploadFile { get; set; }
+        [Required(ErrorMessage = "Role is required")]
+        public string Role { get; set; }
 
         public string? CreateBy { get; set; }
-        public DateTime? DateCreated { get; set; }
+        public DateTime DateCreated { get; set; }
         public string? UpdateBy { get; set; }
-        public DateTime? ModifiedDate { get; set; }
+        public DateTime ModifiedDate { get; set; }
     }
 }

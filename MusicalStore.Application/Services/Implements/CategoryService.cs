@@ -21,6 +21,7 @@ namespace MusicalStore.Application.Services.Implements
         private readonly ICategoryRepository _categoryRepository;
         private readonly IMapper _mapper;
 
+ 
         public CategoryService(ICategoryRepository categoryRepository, IMapper mapper)
         {
             _categoryRepository = categoryRepository;
@@ -59,7 +60,7 @@ namespace MusicalStore.Application.Services.Implements
 
             if (findName != null)
             {
-                responseMessage.Message = "Tên loại hàng đã tồn tại";
+                responseMessage.Message = "The name of the product has existed";
                 responseMessage.StatusCode = 400;
             }
             else
@@ -73,12 +74,12 @@ namespace MusicalStore.Application.Services.Implements
                 var create = await _categoryRepository.Create(category);
                 if (create > 0)
                 {
-                    responseMessage.Message = "Thêm loại hàng thành công";
+                    responseMessage.Message = "Success";
                     responseMessage.StatusCode = 200;
                 }
                 else
                 {
-                    responseMessage.Message = "Thêm loại hàng không thành công";
+                    responseMessage.Message = "Fail";
                     responseMessage.StatusCode = 500;
                 }
             }
@@ -98,12 +99,12 @@ namespace MusicalStore.Application.Services.Implements
             ResponseMessage responseMessage = new();
             if (update > 0)
             {
-                responseMessage.Message = "Cập nhật thông tin thành công";
+                responseMessage.Message = "Success";
                 responseMessage.StatusCode = 200;
             }
             else
             {
-                responseMessage.Message = "Cập nhật thông tin thất bại";
+                responseMessage.Message = "Fail";
                 responseMessage.StatusCode = 500;
             }
             return responseMessage;
@@ -117,7 +118,7 @@ namespace MusicalStore.Application.Services.Implements
 
             if (!exists)
             {
-                responseMessage.Message = "Loại hàng không tồn tại";
+                responseMessage.Message = "Not Found";
                 responseMessage.StatusCode = 400;
 
                 return responseMessage;
@@ -128,12 +129,12 @@ namespace MusicalStore.Application.Services.Implements
 
                 if (delete > 0)
                 {
-                    responseMessage.Message = "Xóa loại hàng thành công";
+                    responseMessage.Message = "Success";
                     responseMessage.StatusCode = 200;
                 }
                 else
                 {
-                    responseMessage.Message = "Xóa loại hàng thất bại";
+                    responseMessage.Message = "Fail";
                     responseMessage.StatusCode = 500;
                 }
                 return responseMessage;

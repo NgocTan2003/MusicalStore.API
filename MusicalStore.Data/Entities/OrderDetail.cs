@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MusicalStore.Common.Enums;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -8,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace MusicalStore.Data.Entities
 {
-    public class OrderDetail
+    public class OrderDetail : DateCommon
     {
         [Key]
         [ForeignKey("ProductID")]

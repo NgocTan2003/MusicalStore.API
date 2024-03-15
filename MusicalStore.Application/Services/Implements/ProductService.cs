@@ -57,7 +57,7 @@ namespace MusicalStore.Application.Services.Implements
 
             if (findCategory == null)
             {
-                responseMessage.Message = "Mã loại hàng không tồn tại";
+                responseMessage.Message = "Not Found Category";
                 responseMessage.StatusCode = 400;
             }
             else
@@ -68,7 +68,10 @@ namespace MusicalStore.Application.Services.Implements
                 product.ProductName = request.ProductName;
                 product.PriceOld = request.PriceOld;
                 product.PriceNew = request.PriceNew;
-                product.Thumbnail = await UploadImage(request.uploadFile);
+                if (request.uploadFile != null)
+                {
+                    product.Thumbnail = await UploadImage(request.uploadFile);
+                }
                 product.Description = request.Description;
                 product.Quantity = request.Quantity;
                 product.DateCreated = DateTime.Now;
@@ -77,12 +80,12 @@ namespace MusicalStore.Application.Services.Implements
                 var create = await _productRepository.Create(product);
                 if (create > 0)
                 {
-                    responseMessage.Message = "Thêm sản phẩm thành công";
+                    responseMessage.Message = "Success";
                     responseMessage.StatusCode = 200;
                 }
                 else
                 {
-                    responseMessage.Message = "Thêm sản phẩm không thành công";
+                    responseMessage.Message = "Fail";
                     responseMessage.StatusCode = 500;
                 }
             }
@@ -113,23 +116,22 @@ namespace MusicalStore.Application.Services.Implements
 
                 if (update > 0)
                 {
-                    responseMessage.Message = "Cập nhật thông tin thành công";
+                    responseMessage.Message = "Success";
                     responseMessage.StatusCode = 200;
                 }
                 else
                 {
-                    responseMessage.Message = "Cập nhật thông tin thất bại";
+                    responseMessage.Message = "Fail";
                     responseMessage.StatusCode = 500;
                 }
                 return responseMessage;
             }
             else
             {
-                responseMessage.Message = "Không tìm thấy mã loại hàng.";
+                responseMessage.Message = "Not Found Category";
                 responseMessage.StatusCode = 500;
                 return responseMessage;
             }
-
         }
 
         public async Task<ResponseMessage> DeleteProduct(Guid id)
@@ -140,7 +142,7 @@ namespace MusicalStore.Application.Services.Implements
 
             if (!exists)
             {
-                responseMessage.Message = "Sản phẩm không tồn tại";
+                responseMessage.Message = "Not Found";
                 responseMessage.StatusCode = 400;
 
                 return responseMessage;
@@ -151,12 +153,12 @@ namespace MusicalStore.Application.Services.Implements
 
                 if (delete > 0)
                 {
-                    responseMessage.Message = "Xóa sản phẩm thành công";
+                    responseMessage.Message = "Success";
                     responseMessage.StatusCode = 200;
                 }
                 else
                 {
-                    responseMessage.Message = "Xóa sản phẩm thất bại";
+                    responseMessage.Message = "Fail";
                     responseMessage.StatusCode = 500;
                 }
                 return responseMessage;
@@ -169,7 +171,7 @@ namespace MusicalStore.Application.Services.Implements
             var imageFolder = $@"\uploaded\Product\images\{DateTime.Now.ToString("yyyyMMdd")}";
 
             string folder = _webHostEnvironment.WebRootPath + imageFolder;
-            var randomfile = System.IO.Path.GetRandomFileName();
+
             var nameImage = $"{request.FileName}.jpg";
 
             if (!Directory.Exists(folder))
@@ -185,7 +187,7 @@ namespace MusicalStore.Application.Services.Implements
                 fs.Flush();
             }
             var pathimage = Path.Combine(imageFolder, nameImage).Replace(@"\", @"/");
-            var responseimage = "https://localhost:7184" + "/" + pathimage;
+            var responseimage = "https://localhost:7099" + "/" + pathimage;
             return responseimage;
         }
     }

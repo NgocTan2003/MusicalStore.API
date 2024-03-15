@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MusicalStore.Common.Enums;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -7,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace MusicalStore.Data.Entities
 {
-    public class Category
+    public class Category : DateCommon
     {
         [Key]
         public Guid CategoryID { get; set; }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MusicalStore.Common.Enums;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -8,12 +9,12 @@ using System.Threading.Tasks;
 
 namespace MusicalStore.Data.Entities
 {
-    public class FeedBack
+    public class FeedBack : DateCommon
     {
         [Key]
         public Guid FeedBackID { get; set; }
-        [ForeignKey("UserID")]
-        public Guid UserID { get; set; }
+        [ForeignKey("Id")]
+        public string Id { get; set; }
         [ForeignKey("ProductID")]
         public Guid ProductID { get; set; }
         [Required]
@@ -27,7 +28,7 @@ namespace MusicalStore.Data.Entities
         public DateTime ModifiedDate { get; set; }
 
 
-        public User User { get; set; }
+        public AppUser appUser { get; set; }
         public Product Product { get; set; }
     }
 }

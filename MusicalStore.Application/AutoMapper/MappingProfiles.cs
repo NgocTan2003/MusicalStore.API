@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using MusicalStore.Data.Entities;
+using MusicalStore.Dtos.AppRole;
 using MusicalStore.Dtos.CartItems;
 using MusicalStore.Dtos.Carts;
 using MusicalStore.Dtos.Categories;
@@ -7,6 +8,7 @@ using MusicalStore.Dtos.FeedBacks;
 using MusicalStore.Dtos.Galleries;
 using MusicalStore.Dtos.OrderDetails;
 using MusicalStore.Dtos.Orders;
+using MusicalStore.Dtos.Permissions;
 using MusicalStore.Dtos.Products;
 using MusicalStore.Dtos.Users;
 using System;
@@ -21,7 +23,8 @@ namespace MusicalStore.Application.AutoMapper
     {
         public MappingProfiles()
         {
-            CreateMap<User, UserDto>().ReverseMap();
+            CreateMap<AppUser, UserDto>().ReverseMap();
+            CreateMap<Permission, PermissionDto>().ReverseMap();
             CreateMap<Product, ProductDto>().ReverseMap();
             CreateMap<Order, OrderDto>().ReverseMap();
             CreateMap<OrderDetail, OrderDetailDto>().ReverseMap();
@@ -30,6 +33,7 @@ namespace MusicalStore.Application.AutoMapper
             CreateMap<Category, CategoryDto>().ReverseMap();
             CreateMap<Cart, CartDto>().ReverseMap();
             CreateMap<CartItem, CartItemDto>().ReverseMap();
+
         }
     }
 }

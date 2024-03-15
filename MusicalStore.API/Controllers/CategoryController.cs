@@ -1,5 +1,7 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using MusicalStore.Application.AutoMapper;
 using MusicalStore.Application.Services.Implements;
 using MusicalStore.Application.Services.Interfaces;
 using MusicalStore.Common.ResponseBase;
@@ -13,10 +15,12 @@ namespace MusicalStore.API.Controllers
     public class CategoryController : ControllerBase
     {
         private readonly ICategoryService _categoryService;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public CategoryController(ICategoryService categoryService)
+        public CategoryController(ICategoryService categoryService, IHttpContextAccessor httpContextAccessor)
         {
             _categoryService = categoryService;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         [HttpGet]
@@ -55,16 +59,23 @@ namespace MusicalStore.API.Controllers
         }
 
         [HttpPost("Create")]
+        [Authorize]
         public async Task<IActionResult> CreateCategory([FromBody] CreateCategory request)
         {
             try
             {
-                if (!ModelState.IsValid)
+                var hasAccess = await AuthorizationHelper.CheckAccess(_httpContextAccessor.HttpContext, "Category", "Create");
+
+                if (hasAccess.StatusCode == 200)
                 {
-                    return BadRequest(new ResponseMessage("Fail"));
+                    var create = await _categoryService.CreateCategory(request);
+                    return Ok(create);
                 }
-                var create = await _categoryService.CreateCategory(request);
-                return Ok(create);
+                else
+                {
+                    return Ok(hasAccess);
+                }
+
             }
             catch (Exception ex)
             {
@@ -73,16 +84,22 @@ namespace MusicalStore.API.Controllers
         }
 
         [HttpPut("Update")]
+        [Authorize]
         public async Task<IActionResult> UpdateCategory([FromBody] UpdateCategory request)
         {
             try
             {
-                if (!ModelState.IsValid)
+                var hasAccess = await AuthorizationHelper.CheckAccess(_httpContextAccessor.HttpContext, "Category", "Update");
+
+                if (hasAccess.StatusCode == 200)
                 {
-                    return BadRequest(new ResponseMessage("Fail"));
+                    var update = await _categoryService.UpdateCategory(request);
+                    return Ok(update);
                 }
-                var update = await _categoryService.UpdateCategory(request);
-                return Ok(update);
+                else
+                {
+                    return Ok(hasAccess);
+                }
             }
             catch (Exception ex)
             {
@@ -92,12 +109,22 @@ namespace MusicalStore.API.Controllers
         }
 
         [HttpDelete("id")]
+        [Authorize]
         public async Task<IActionResult> Delete(Guid id)
         {
             try
             {
-                var delete = await _categoryService.DeleteCategory(id);
-                return Ok(delete);
+                var hasAccess = await AuthorizationHelper.CheckAccess(_httpContextAccessor.HttpContext, "Category", "Delete");
+
+                if (hasAccess.StatusCode == 200)
+                {
+                    var delete = await _categoryService.DeleteCategory(id);
+                    return Ok(delete);
+                }
+                else
+                {
+                    return Ok(hasAccess);
+                }
             }
             catch (Exception ex)
             {

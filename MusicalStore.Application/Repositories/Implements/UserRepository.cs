@@ -1,8 +1,10 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using MusicalStore.Application.Repositories.Interfaces;
 using MusicalStore.Application.Repositories.RepositoryBase;
 using MusicalStore.Data.EF;
 using MusicalStore.Data.Entities;
+using MusicalStore.Dtos.Users;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,80 +14,85 @@ using static MusicalStore.Application.Repositories.RepositoryBase.IRepositoryBas
 
 namespace MusicalStore.Application.Repositories.Implements
 {
-    public class UserRepository : RepositoryBase<User>, IUserRepository 
+    public class UserRepository : IUserRepository
     {
-        private readonly DataContext _dataContext;
+        private readonly UserManager<AppUser> _userManager;
 
-        public UserRepository(DataContext dataContext) : base(dataContext)
+        public UserRepository(UserManager<AppUser> userManager)
         {
-            _dataContext = dataContext;
+            _userManager = userManager;
         }
 
-        public async Task<User?> GetUserByUsername(string username)
+        public async Task<AppUser?> GetUserByUsername(string username)
         {
-            return _dataContext.Users.Where(e => e.UserName == username).FirstOrDefault();
+            return await _userManager.FindByNameAsync(username);
         }
 
-        public async Task<User?> GetUserByEmail(string email)
+        public async Task<AppUser?> GetUserByEmail(string email)
         {
-            return _dataContext.Users.Where(e => e.Email == email).FirstOrDefault();
+            return await _userManager.FindByEmailAsync(email);
         }
 
+        public async Task<List<AppUser>> GetAllUser()
+        {
+            return await _userManager.Users.ToListAsync();
+        }
 
-        //public async Task<bool> UserExists(Guid id)
-        //{
-        //    var result = await _dataContext.Users.FirstOrDefaultAsync(u => u.UserID == id);
-        //    return result != null;
-        //}
+        public async Task<AppUser> GetUserById(string id)
+        {
+            return await _userManager.FindByIdAsync(id);
+        }
 
-        //public async Task<List<User>> GetAllUser()
-        //{
-        //    var result = await _dataContext.Users.ToListAsync();
-        //    return result;
-        //}
+        public async Task<IList<string>> GetAllRoleByName(string UserName)
+        {
+            var user = await _userManager.FindByNameAsync(UserName);
+            var listrole = await _userManager.GetRolesAsync(user);
+            return listrole;
+        }
 
-        //public async Task<User?> GetUserById(Guid id)
-        //{
-        //    return await _dataContext.Users.FindAsync(id);
-        //}
+        public async Task<bool> AddRole(AppUser user, IList<string> Roles)
+        {
+            var createrole = await _userManager.AddToRolesAsync(user, Roles);
+            if (createrole.Succeeded)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
 
-        //public async Task<Guid> CreateUser(User user)
-        //{
-        //    _dataContext.Users.Add(user);
-        //    await _dataContext.SaveChangesAsync();
-        //    return user.UserID;
-        //}
+        public async Task<bool> CreateUser(AppUser user, string password)
+        {
+            var create = await _userManager.CreateAsync(user, password);
+            if (create.Succeeded)
+            {
+                return true;
+            }
+            return false;
+        }
 
-        //public async Task<bool> UpdateUser(User user)
-        //{
-        //    bool isUpdate = false;
+        public async Task<bool> UpdateUser(AppUser user)
+        {
+            var update = await _userManager.UpdateAsync(user);
+            if (update.Succeeded)
+            {
+                return true;
+            }
+            return false;
+        }
 
-        //    _dataContext.Users.Update(user);
-        //    int affectedRows = await _dataContext.SaveChangesAsync();
+        public async Task<bool> DeleteUser(AppUser user)
+        {
+            var delete = await _userManager.DeleteAsync(user);
+            if (delete.Succeeded)
+            {
+                return true;
+            }
+            return false;
+        }
 
-        //    if (affectedRows > 0)
-        //    {
-        //        isUpdate = true;
-        //    }
-
-        //    return isUpdate;
-        //}
-
-        //public async Task<bool> DeleteUser(User user)
-        //{
-        //    bool isDeleted = false;
-
-        //    _dataContext.Users.Remove(user);
-        //    int affectedRows = await _dataContext.SaveChangesAsync();
-
-        //    if (affectedRows > 0)
-        //    {
-        //        isDeleted = true;
-        //    }
-
-        //    return isDeleted;
-        //}
-
-
+       
     }
 }

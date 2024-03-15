@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MusicalStore.Common.Enums;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace MusicalStore.Dtos.OrderDetails
 {
-    public class OrderDetailDto
+    public class OrderDetailDto : DateCommon
     {
         public Guid ProductID { get; set; }
         public Guid OrderID { get; set; }

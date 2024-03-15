@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MusicalStore.Common.Enums;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,10 +7,10 @@ using System.Threading.Tasks;
 
 namespace MusicalStore.Dtos.FeedBacks
 {
-    public class FeedBackDto
+    public class FeedBackDto : DateCommon
     {
         public Guid FeedBackID { get; set; }
-        public Guid UserID { get; set; }
+        public string Id { get; set; }
         public Guid ProductID { get; set; }
         public int StarReview { get; set; }
         public string? ContentRated { get; set; }
