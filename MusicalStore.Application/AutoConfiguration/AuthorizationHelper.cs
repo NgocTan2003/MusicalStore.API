@@ -11,7 +11,7 @@ using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MusicalStore.Application.AutoMapper
+namespace MusicalStore.Application.AutoConfiguration
 {
     public static class AuthorizationHelper
     {

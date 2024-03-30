@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using MusicalStore.Application.AutoMapper;
+using MusicalStore.Application.AutoConfiguration;
 using MusicalStore.Application.Services.Interfaces;
 using MusicalStore.Dtos.OrderDetails;
 using MusicalStore.Dtos.Orders;

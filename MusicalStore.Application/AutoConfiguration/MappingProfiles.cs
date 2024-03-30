@@ -17,7 +17,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MusicalStore.Application.AutoMapper
+namespace MusicalStore.Application.AutoConfiguration
 {
     public class MappingProfiles : Profile
     {

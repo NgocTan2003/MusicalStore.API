@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using MusicalStore.Application.AutoMapper;
+using MusicalStore.Application.AutoConfiguration;
 using MusicalStore.Application.Services.Interfaces;
 using MusicalStore.Dtos.Galleries;
 using MusicalStore.Dtos.Orders;
@@ -17,7 +17,7 @@ namespace MusicalStore.API.Controllers
 
         public OrderController(IOrderService orderService, IHttpContextAccessor httpContextAccessor)
         {
-            _orderService = orderService; 
+            _orderService = orderService;
             _httpContextAccessor = httpContextAccessor;
         }
 
