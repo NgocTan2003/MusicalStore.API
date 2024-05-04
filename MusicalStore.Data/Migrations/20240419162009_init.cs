@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace MusicalStore.Data.Migrations
 {
-    public partial class Init : Migration
+    public partial class init : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -31,6 +31,9 @@ namespace MusicalStore.Data.Migrations
                     FullName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Gender = table.Column<int>(type: "int", nullable: false),
                     Avatar = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    RefreshToken = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    TokenExpirationTime = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    RefreshTokenExpirationTime = table.Column<DateTime>(type: "datetime2", nullable: true),
                     CreateBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     DateCreated = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UpdateBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
@@ -221,8 +224,8 @@ namespace MusicalStore.Data.Migrations
                 {
                     OrderID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Id = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    OrderDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Receiver = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    PhoneNumber = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     DeliveryAddress = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     OrderStatus = table.Column<int>(type: "int", nullable: false),
                     TotalMoney = table.Column<double>(type: "float", nullable: false),

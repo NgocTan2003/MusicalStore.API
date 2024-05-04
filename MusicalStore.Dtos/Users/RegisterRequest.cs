@@ -28,7 +28,6 @@ namespace MusicalStore.Dtos.Users
         [Required(ErrorMessage = "Phone number is required")]
         [RegularExpression(@"^\+?\d{10,12}$", ErrorMessage = "Invalid phone number")]
         public string PhoneNumber { get; set; } = "";
-        public UploadFile? UploadFile { get; set; }
         [Required(ErrorMessage = "Role is required")]
         public string Role { get; set; }
 

@@ -16,6 +16,5 @@ namespace MusicalStore.Application.Services.Interfaces
         string GenerateRefreshToken();
         Task<TokenResponse> RefreshToken(TokenApiModel tokenApiModel);
         ClaimsPrincipal GetPrincipalFromExpiredToken(string token);
-        DateTime ConvertUnixTimeToDateTime(long utcExpireDate);
     }
 }

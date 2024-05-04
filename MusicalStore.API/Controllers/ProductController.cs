@@ -37,6 +37,20 @@ namespace MusicalStore.API.Controllers
             }
         }
 
+        [HttpGet("Pagination")]
+        public async Task<IActionResult> GetPaginationProduct(int page)
+        {
+            try
+            {
+                var products = await _productService.GetPaginationProduct(page);
+                return Ok(products);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Message = ex.Message });
+            }
+        }
+
         [HttpGet("id")]
         public async Task<IActionResult> GetByID(Guid id)
         {
@@ -93,6 +107,31 @@ namespace MusicalStore.API.Controllers
                 if (hasAccess.StatusCode == 200)
                 {
                     var update = await _productService.UpdateProduct(request);
+                    return Ok(update);
+                }
+                else
+                {
+                    return Ok(hasAccess);
+                }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = ex.Message });
+
+            }
+        }
+
+        [HttpPut("UpdateThumnail")]
+        [Authorize]
+        public async Task<IActionResult> UpdateThumnailProduct(Guid Id, IFormFile file, string bucketName, string namefile)
+        {
+            try
+            {
+                var hasAccess = await AuthorizationHelper.CheckAccess(_httpContextAccessor.HttpContext, "Gallery", "Update");
+
+                if (hasAccess.StatusCode == 200)
+                {
+                    var update = await _productService.UpdateThumbnailProduct(Id, file, bucketName, namefile);
                     return Ok(update);
                 }
                 else

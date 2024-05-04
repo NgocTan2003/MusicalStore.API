@@ -27,6 +27,8 @@ using System.Diagnostics.Eventing.Reader;
 using MusicalStore.Application.AutoConfiguration;
 using Org.BouncyCastle.Asn1.Ocsp;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Amazon.Runtime.Internal;
 
 namespace MusicalStore.Application.Services.Implements
 {
@@ -36,32 +38,29 @@ namespace MusicalStore.Application.Services.Implements
         private readonly IUserRepository _userRepository;
         private readonly ICartService _cartService;
         private readonly IMapper _mapper;
-        private readonly IWebHostEnvironment _webHostEnvironment;
         private readonly SignInManager<AppUser> _signInManager;
         private readonly ITokenService _tokenSerVice;
-        private readonly RoleManager<IdentityRole> _roleManager;
         private readonly IEmailService _emailService;
         private readonly UserManager<AppUser> _userManager;
         private readonly IConfiguration _config;
         private readonly DataContext _context;
+        private readonly IAwsS3Service _awsS3Service;
 
         public UserService(IUserRepository userRepository, ICartService cartService, SignInManager<AppUser> signInManager,
-            IMapper mapper, IWebHostEnvironment webHostEnvironment, ITokenService tokenSerVice, RoleManager<IdentityRole> roleManager
-            , IEmailService emailService, UserManager<AppUser> userManager, IConfiguration config, DataContext context)
+            IMapper mapper, ITokenService tokenSerVice, IAwsS3Service awsS3Service, IEmailService emailService,
+            UserManager<AppUser> userManager, IConfiguration config, DataContext context)
         {
             _userRepository = userRepository;
             _cartService = cartService;
             _signInManager = signInManager;
             _tokenSerVice = tokenSerVice;
-            _roleManager = roleManager;
+            _awsS3Service = awsS3Service;
             _mapper = mapper;
-            _webHostEnvironment = webHostEnvironment;
             _emailService = emailService;
             _userManager = userManager;
             _config = config;
             _context = context;
         }
-
         public async Task<TokenResponse> Authentication(AuthenticationRequest request)
         {
             var result = new TokenResponse();
@@ -69,82 +68,82 @@ namespace MusicalStore.Application.Services.Implements
 
             if (user == null)
             {
-                result.StatusCode = 400;
+                result.StatusCode = 404;
                 result.Message = "No user found";
                 return result;
             }
-            else if (user.LockoutEnd != null)
+            else if (await _userManager.IsLockedOutAsync(user))
             {
                 result.StatusCode = 400;
                 result.Message = $"The account is locked {user.LockoutEnd}";
                 return result;
             }
-            else if (user.TwoFactorEnabled == true)
+
+            if (user.TwoFactorEnabled)
             {
-                result.StatusCode = 400;
-                result.Message = "You must login with OTP";
-                return result;
+                if (await _userManager.CheckPasswordAsync(user, request.Password))
+                {
+                    await _signInManager.SignOutAsync();
+                    await _signInManager.PasswordSignInAsync(user, request.Password, false, true);
+                    var tokenOTP = await _userManager.GenerateTwoFactorTokenAsync(user, "Email");
+                    var message = _emailService.ChangeToMessageEmail(user.Email!, "OTP Confrimation", tokenOTP);
+                    var send = await _emailService.SendEmail(message);
+                    result.StatusCode = send.StatusCode;
+                    result.Message = send.Message;
+                    return result;
+                }
+                else
+                {
+                    await _userManager.AccessFailedAsync(user);
+                    result.StatusCode = 401;
+                    result.Message = "Invalid password";
+                    return result;
+                }
             }
 
-            int accessFailedCount = await _userManager.GetAccessFailedCountAsync(user);
             var SignIn = await _signInManager.PasswordSignInAsync(user, request.Password, true, true);
-            if (SignIn.Succeeded == false)
-            {
-                if (accessFailedCount >= 2)
-                {
-                    user.TwoFactorEnabled = true;
-                }
-                result.StatusCode = 400;
-                result.Message = "Đăng nhập không thành công";
-                return result;
-            }
-            else
+            if (SignIn.Succeeded)
             {
                 var roles = await _userRepository.GetAllRoleByName(user.UserName);
                 var claimUser = new ClaimUserLogin()
                 {
                     Id = user.Id,
                     UserName = request.UserName,
-                    Email = request.UserName,
+                    Email = user.Email,
                     Roles = roles
                 };
                 var token = _tokenSerVice.GenerateAccessToken(claimUser);
                 var refeshToken = _tokenSerVice.GenerateRefreshToken();
-                user.TokenExpirationTime = DateTime.Now.AddMinutes(2);
-                user.RefeshToken = refeshToken;
-                user.RefreshTokenExpirationTime = DateTime.Now.AddMinutes(4);
+                var timeToken = int.TryParse(_config["JWT:TokenExpirationTime"], out int tokenExpirationTime);
+                var timeRefeshToken = int.TryParse(_config["JWT:RefreshTokenExpirationTime"], out int refeshtokenExpirationTime);
+
+                user.TokenExpirationTime = DateTime.Now.AddMinutes(tokenExpirationTime);
+                user.RefreshToken = refeshToken;
+                user.RefreshTokenExpirationTime = DateTime.Now.AddMinutes(refeshtokenExpirationTime);
                 await _context.SaveChangesAsync();
                 await _userManager.UpdateAsync(user);
 
-                result.Id = user.Id;
-                result.UserName = user.UserName;
-                result.AccessToken = token;
-                result.RefeshToken = refeshToken;
-                result.Message = "Đăng nhập thành công";
-                result.TokenExpiration = DateTime.Now.AddMinutes(2);
-                result.RefreshTokenExpiration = DateTime.Now.AddMinutes(4);
+                var response = new TokenResponse(user.Id, user.UserName, token, refeshToken, 200, "Login success", DateTime.Now.AddMinutes(tokenExpirationTime), DateTime.Now.AddMinutes(refeshtokenExpirationTime));
+                return response;
+            }
+            else
+            {
+                int accessFailedCount = await _userManager.GetAccessFailedCountAsync(user);
+                if (accessFailedCount >= 2)
+                {
+                    user.TwoFactorEnabled = true;
+                }
+                await _context.SaveChangesAsync();
+                await _userManager.UpdateAsync(user);
+                result.StatusCode = 401;
+                result.Message = "Invalid password";
                 return result;
             }
         }
 
-        public async Task<ResponseMessage> SendEmailOTP(string username, string password)
-        {
-            var user = await _userRepository.GetUserByUsername(username);
-            var result = new ResponseMessage();
-            if (user.TwoFactorEnabled)
-            {
-                await _signInManager.SignOutAsync();
-                await _signInManager.PasswordSignInAsync(user, password, false, true);
-                var tokenOTP = await _userManager.GenerateTwoFactorTokenAsync(user, "Email");
-                var message = _emailService.ChangeToMessageEmail(user.Email!, "OTP Confrimation", tokenOTP);
-                result = await _emailService.SendEmail(message);
-            }
-            return result;
-        }
-
         public async Task<TokenResponse> AuthenticationOTP(string code, string username)
         {
-            var tokenResponse = new TokenResponse();
+            var result = new TokenResponse();
             var user = await _userRepository.GetUserByUsername(username);
             var singIn = await _signInManager.TwoFactorSignInAsync("Email", code, false, false);
 
@@ -161,20 +160,28 @@ namespace MusicalStore.Application.Services.Implements
                         Email = user.Email,
                         Roles = userRole
                     };
-                    var token = _tokenSerVice.GenerateAccessToken(claimUser);
 
-                    tokenResponse.Id = user.Id;
-                    tokenResponse.UserName = user.UserName;
-                    tokenResponse.AccessToken = token;
-                    tokenResponse.Message = "Đăng nhập băng OTP thành công";
+                    var token = _tokenSerVice.GenerateAccessToken(claimUser);
+                    var refeshToken = _tokenSerVice.GenerateRefreshToken();
+                    var timeToken = int.TryParse(_config["JWT:TokenExpirationTime"], out int tokenExpirationTime);
+                    var timeRefeshToken = int.TryParse(_config["JWT:RefreshTokenExpirationTime"], out int refeshtokenExpirationTime);
+
+                    user.TokenExpirationTime = DateTime.Now.AddMinutes(tokenExpirationTime);
+                    user.RefreshToken = refeshToken;
+                    user.RefreshTokenExpirationTime = DateTime.Now.AddMinutes(refeshtokenExpirationTime);
+                    await _context.SaveChangesAsync();
+                    await _userManager.UpdateAsync(user);
+
+                    var response = new TokenResponse(user.Id, user.UserName, token, refeshToken, 200, "Login success", DateTime.Now.AddMinutes(tokenExpirationTime), DateTime.Now.AddMinutes(refeshtokenExpirationTime));
+                    return response;
                 }
             }
             else
             {
-                tokenResponse.StatusCode = 400;
-                tokenResponse.Message = "Đăng nhập không thành công";
+                result.StatusCode = 401;
+                result.Message = "Invalid OTP";
             }
-            return tokenResponse;
+            return result;
         }
 
         public async Task<List<UserDto>> GetAllUser()
@@ -191,50 +198,6 @@ namespace MusicalStore.Application.Services.Implements
             return userDto;
         }
 
-        public async Task<UserDto> GetUserByEmail(string email)
-        {
-            var user = await _userRepository.GetUserByEmail(email);
-            var userDto = _mapper.Map<UserDto>(user);
-            return userDto;
-        }
-
-        public async Task<UserDto> GetUserByUsername(string username)
-        {
-            var user = await _userRepository.GetUserByUsername(username);
-            var userDto = _mapper.Map<UserDto>(user);
-            return userDto;
-        }
-
-        public async Task<IList<string>> GetAllRoleByName(string UserName)
-        {
-            return await _userRepository.GetAllRoleByName(UserName);
-        }
-
-        public async Task<bool> CheckCreateRole(RegisterRequest request)
-        {
-            bool checkRole = false;
-            if (AppRole.Customer == request.Role || AppRole.Admin == request.Role || AppRole.Manager == request.Role)
-            {
-                checkRole = true;
-                if (!await _roleManager.RoleExistsAsync(request.Role) && AppRole.Customer == request.Role)
-                {
-                    await _roleManager.CreateAsync(new IdentityRole(AppRole.Customer));
-                }
-
-                if (!await _roleManager.RoleExistsAsync(request.Role) && AppRole.Admin == request.Role)
-                {
-                    await _roleManager.CreateAsync(new IdentityRole(AppRole.Admin));
-                }
-
-                if (!await _roleManager.RoleExistsAsync(request.Role) && AppRole.Manager == request.Role)
-                {
-                    await _roleManager.CreateAsync(new IdentityRole(AppRole.Manager));
-                }
-            }
-
-            return checkRole;
-        }
-
         public async Task<ResponseCreateUser> CreateUser(RegisterRequest request)
         {
             var result = new ResponseCreateUser();
@@ -249,8 +212,8 @@ namespace MusicalStore.Application.Services.Implements
                 return result;
             }
 
-            bool checkRole = await CheckCreateRole(request);
-            if (!checkRole)
+            var roleInput = request.Role;
+            if (roleInput.Equals("Admin") || roleInput.Equals("Manager") || roleInput.Equals("Customer"))
             {
                 result.StatusCode = 400;
                 result.Message = "Can not find the role";
@@ -265,24 +228,19 @@ namespace MusicalStore.Application.Services.Implements
             user.FullName = request.FullName;
             user.Gender = request.Gender;
             user.PhoneNumber = request.PhoneNumber;
-            if (request.UploadFile != null)
-            {
-                user.Avatar = await UploadImage(request.UploadFile);
-            }
             user.DateCreated = DateTime.Now;
             user.CreateBy = request.CreateBy;
-            //user.TwoFactorEnabled = true;
 
             await _userRepository.CreateUser(user, request.PassWord);
-            if (request.Role == AppRole.Customer)
+            if (request.Role == "Customer")
             {
-                roles.Add(AppRole.Customer);
+                roles.Add(roleInput);
                 await _userRepository.AddRole(user, roles);
                 await _cartService.CreateCart(user.Id);
             }
-            else if (request.Role == AppRole.Admin)
+            else if (request.Role == "Admin")
             {
-                roles.Add(AppRole.Admin);
+                roles.Add(roleInput);
                 await _userRepository.AddRole(user, roles);
             }
             var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
@@ -293,6 +251,7 @@ namespace MusicalStore.Application.Services.Implements
             return result;
         }
 
+        // khi user ForgotPassword sẽ gửi 1 đường link đến email để reset password
         public async Task<ResponseMessage> ForgotPassword(string EmailForgotPassword)
         {
             var result = new ResponseMessage();
@@ -310,6 +269,27 @@ namespace MusicalStore.Application.Services.Implements
             {
                 result.StatusCode = 400;
                 result.Message = "No email found";
+            }
+            return result;
+        }
+
+        public async Task<ResponseMessage> ResetPassword(ResetPassword resetPassword)
+        {
+            var result = new ResponseMessage();
+            var user = await _userRepository.GetUserByEmail(resetPassword.Email);
+            if (user != null)
+            {
+                var resetPassResult = await _userManager.ResetPasswordAsync(user, resetPassword.Token, resetPassword.ConfirmPassword);
+                if (resetPassResult.Succeeded)
+                {
+                    result.StatusCode = 200;
+                    result.Message = "Password has been changed";
+                }
+                else
+                {
+                    result.StatusCode = 400;
+                    result.Message = "Change password fail";
+                }
             }
             return result;
         }
@@ -343,90 +323,72 @@ namespace MusicalStore.Application.Services.Implements
             return result;
         }
 
-        public async Task<ResponseMessage> ResetPassword(ResetPassword resetPassword)
-        {
-            var result = new ResponseMessage();
-            var user = await _userRepository.GetUserByEmail(resetPassword.Email);
-            if (user != null)
-            {
-                var resetPassResult = await _userManager.ResetPasswordAsync(user, resetPassword.Token, resetPassword.ConfirmPassword);
-                if (resetPassResult.Succeeded)
-                {
-                    result.StatusCode = 200;
-                    result.Message = "Password has been changed";
-                }
-                else
-                {
-                    result.StatusCode = 400;
-                    result.Message = "Change password fail";
-                }
-            }
-            return result;
-        }
-
         public async Task<ResponseMessage> UpdateUser(UpdateUser request)
         {
             ResponseMessage responseMessage = new();
-
-            var find = await _userRepository.GetUserByUsername(request.UserName);
-            if (find.Email == request.Email)
+            try
             {
-                responseMessage.Message = "Email already exist";
-                responseMessage.StatusCode = 400;
-            }
-            else
-            {
-                find.PasswordHash = request.PassWord;
-                find.Email = request.Email;
+                var find = await _userRepository.GetUserByUsername(request.UserName);
                 find.FullName = request.FullName;
                 find.Gender = request.Gender;
                 find.PhoneNumber = request.PhoneNumber;
                 find.UpdateBy = request.UpdateBy;
                 find.ModifiedDate = DateTime.Now;
-            }
-            if (request.UploadFile != null)
-            {
-                find.Avatar = await UploadImage(request.UploadFile);
-            }
 
-            var update = await _userRepository.UpdateUser(find);
-
-            if (update)
-            {
-                responseMessage.Message = "Success";
-                responseMessage.StatusCode = 200;
+                var update = await _userRepository.UpdateUser(find);
+                if (update)
+                {
+                    responseMessage.Message = "Success";
+                    responseMessage.StatusCode = 200;
+                }
+                else
+                {
+                    responseMessage.Message = "Fail";
+                    responseMessage.StatusCode = 500;
+                }
             }
-            else
+            catch (Exception ex)
             {
-                responseMessage.Message = "Fail";
+                responseMessage.Message = ex.Message;
                 responseMessage.StatusCode = 500;
             }
             return responseMessage;
         }
 
-        public async Task<string> UploadImage(UploadFile request)
+        public async Task<ResponseMessage> UpdateAvatar(string username, IFormFile file, string bucketName, string? prefix, string? namefile)
         {
-
-            var imageFolder = $@"\uploaded\Avatar\images\{DateTime.Now.ToString("yyyyMMdd")}";
-
-            string folder = _webHostEnvironment.WebRootPath + imageFolder;
-            var nameImage = $"{request.FileName}.jpg";
-
-            if (!Directory.Exists(folder))
+            var responseMessage = new ResponseMessage();
+            try
             {
-                Directory.CreateDirectory(folder);
+                var user = await _userRepository.GetUserByUsername(username);
+                var response = await _awsS3Service.UploadFile(file, bucketName, prefix, namefile);
+                if (response.StatusCode == 200)
+                {
+                    user.Avatar = response.PresignedUrl;
+                    var update = await _userRepository.UpdateUser(user);
+                    if (update)
+                    {
+                        responseMessage.Message = "Update Avatar Success";
+                        responseMessage.StatusCode = 200;
+                    }
+                    else
+                    {
+                        responseMessage.Message = "Update Avatar Fail";
+                        responseMessage.StatusCode = 500;
+                    }
+                }
+                else
+                {
+                    responseMessage.StatusCode = response.StatusCode;
+                    response.Message = response.Message;
+                }
             }
-
-            string filePath = Path.Combine(folder, nameImage);
-
-            using (FileStream fs = System.IO.File.Create(filePath))
+            catch (Exception ex)
             {
-                fs.Write(request.Bytes, 0, request.Bytes.Length);
-                fs.Flush();
+                responseMessage.Message = ex.Message;
+                responseMessage.StatusCode = 500;
             }
-            var pathimage = Path.Combine(imageFolder, nameImage).Replace(@"\", @"/");
-            var responseimage = "https://localhost:7099" + "/" + pathimage;
-            return responseimage;
+            return responseMessage;
         }
 
         public async Task<ResponseMessage> DeleteUser(string id)
@@ -458,6 +420,7 @@ namespace MusicalStore.Application.Services.Implements
                 return responseMessage;
             }
         }
+
 
     }
 }

@@ -1,3 +1,0 @@
-﻿- Nếu kích hoạt user.TwoFactorEnabled = true; người dùng không thể login thường đc nữa mà phải login theo OTP
-- Nếu email mà chưa đc xác thực mà login bằng gửi mã OTP success thì vẫn cho là login fail
-- Phía ng dùng nếu login sai đến lần T2 sẽ bắt login bằng OTP và nếu gửi username, password sai vẫn gửi gửi OTP; đúng cả username, password, OTP cho login 

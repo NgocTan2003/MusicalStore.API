@@ -11,15 +11,9 @@ namespace MusicalStore.Dtos.Users
 {
     public class UserDto : IdentityUser, DateCommon
     {
-        //public string UserID { get; set; }
-        //public string UserName { get; set; } = "";
-        //public string PassWord { get; set; } = "";
-        //public string Email { get; set; } = "";
         public string FullName { get; set; } = "";
         public Gender Gender { get; set; }
-        //public string PhoneNumber { get; set; } = "";
         public string? Avatar { get; set; }
-
         public string? CreateBy { get; set; }
         public DateTime DateCreated { get; set; }
         public string? UpdateBy { get; set; }

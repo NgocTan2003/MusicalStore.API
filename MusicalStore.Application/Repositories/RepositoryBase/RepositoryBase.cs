@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using MusicalStore.Common.Seedwork;
 using MusicalStore.Data.EF;
 using MusicalStore.Data.Entities;
 using System;
@@ -14,10 +15,11 @@ namespace MusicalStore.Application.Repositories.RepositoryBase
     {
         private readonly DbSet<T> table;
         private readonly DataContext _context;
+        private static int PageSize { get; set; } = 5;
+
 
         public RepositoryBase(DataContext context)
         {
-
             _context = context;
             table = _context.Set<T>();
         }
@@ -66,6 +68,10 @@ namespace MusicalStore.Application.Repositories.RepositoryBase
             return 0;
         }
 
-
+        public async Task<List<T>> Pagination(int page = 1)
+        {
+            var result = PaginatedList<T>.Create(GetAll(), page, PageSize);
+            return result;
+        }
     }
 }

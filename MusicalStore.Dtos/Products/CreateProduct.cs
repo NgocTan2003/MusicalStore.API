@@ -27,8 +27,6 @@ namespace MusicalStore.Dtos.Products
         [Required(ErrorMessage = ("Quantity is required"))]
         [Range(1, int.MaxValue, ErrorMessage = "Quantity must be greater than 0.")]
         public int Quantity { get; set; }
-        public UploadFile? uploadFile { get; set; }
-
         public string? CreateBy { get; set; }
         public DateTime DateCreated { get; set; }
         public string? UpdateBy { get; set; }

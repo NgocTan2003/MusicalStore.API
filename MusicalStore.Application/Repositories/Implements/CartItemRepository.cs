@@ -22,7 +22,6 @@ namespace MusicalStore.Application.Repositories.Implements
         public async Task<CartItem?> GetCartItemByID(Guid idCart, Guid idProduct)
         {
             return _dataContext.CartItems.Where(e => e.CartID == idCart && e.ProductID == idProduct).FirstOrDefault();
-
         }
 
         public async Task<int> DeleteCartItem(Guid idCart, Guid idProduct)

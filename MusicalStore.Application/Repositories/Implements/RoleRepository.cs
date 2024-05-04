@@ -26,20 +26,21 @@ namespace MusicalStore.Application.Repositories.Implements
             _context = context;
         }
 
-        public async Task<List<string>> GetAll()
+        public async Task<List<Role>> GetAll()
         {
-            var list = new List<string>();
-            Type appRoleType = typeof(AppRole);
-            FieldInfo[] fields = appRoleType.GetFields(BindingFlags.Public | BindingFlags.Static);
+            //var list = new List<string>();
+            //Type appRoleType = typeof(AppRole);
+            //FieldInfo[] fields = appRoleType.GetFields(BindingFlags.Public | BindingFlags.Static);
 
-            foreach (FieldInfo field in fields)
-            {
-                if (field.FieldType == typeof(string))
-                {
-                    list.Add((string)field.GetValue(null));
-                }
-            }
-            return list;
+            //foreach (FieldInfo field in fields)
+            //{
+            //    if (field.FieldType == typeof(string))
+            //    {
+            //        list.Add((string)field.GetValue(null));
+            //    }
+            //}
+            //return list;
+            return await _context.Roles.ToListAsync();
         }
 
         public async Task<bool> CheckPermission(PermissionInput permissionInput)
@@ -51,8 +52,8 @@ namespace MusicalStore.Application.Repositories.Implements
             var listroles = await this.GetAll();
             var query = from f in functions
                         join p in permissions on f.FunctionId equals p.FunctionId
-                        join r in listroles on p.RoleName equals r
-                        where request.Role.Contains(r) && f.FunctionId == request.FunctionId
+                        join r in listroles on p.RoleName equals r.Name
+                        where request.Role.Contains(r.Name) && f.FunctionId == request.FunctionId
                         && ((p.CanCreate && request.Action == "Create")
                         || (p.CanUpdate && request.Action == "Update")
                         || (p.CanDelete && request.Action == "Delete")

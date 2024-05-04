@@ -6,7 +6,7 @@ namespace MusicalStore.Application.Services
 {
     public interface IRoleService
     {
-        Task<List<string>> GetAll();
+        Task<List<Role>> GetAll();
         Task<ResponseMessage> CheckPermission(PermissionInput request);
     }
 }

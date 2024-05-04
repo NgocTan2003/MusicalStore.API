@@ -21,7 +21,7 @@ namespace MusicalStore.Data.EF
         public DbSet<CartItem> CartItems { get; set; }
         public DbSet<Order> Orders { get; set; }
         public DbSet<OrderDetail> OrderDetails { get; set; }
-        //public DbSet<AppRole> AppRoles { get; set; }
+        public DbSet<Role> Roles { get; set; }
         public DbSet<Permission> Permissions { get; set; }
         public DbSet<Function> Functions { get; set; }
 
@@ -33,6 +33,8 @@ namespace MusicalStore.Data.EF
 
             modelBuilder.Entity<OrderDetail>()
                 .HasKey(ci => new { ci.OrderID, ci.ProductID });
+
+            modelBuilder.Seed();
 
             base.OnModelCreating(modelBuilder);
         }

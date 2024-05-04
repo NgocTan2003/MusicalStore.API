@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using MusicalStore.Application.Repositories.Implements;
 using MusicalStore.Application.Repositories.Interfaces;
@@ -22,14 +23,14 @@ namespace MusicalStore.Application.Services.Implements
         private readonly IProductRepository _productRepository;
         private readonly ICategoryRepository _categoryRepository;
         private readonly IMapper _mapper;
-        private readonly IWebHostEnvironment _webHostEnvironment;
+        private readonly IAwsS3Service _awsS3Service;
 
-        public ProductService(IProductRepository productRepository, ICategoryRepository categoryRepository, IMapper mapper, IWebHostEnvironment webHostEnvironment)
+        public ProductService(IProductRepository productRepository, ICategoryRepository categoryRepository, IMapper mapper, IAwsS3Service awsS3Service)
         {
             _productRepository = productRepository;
             _categoryRepository = categoryRepository;
             _mapper = mapper;
-            _webHostEnvironment = webHostEnvironment;
+            _awsS3Service = awsS3Service;
         }
 
         public async Task<List<ProductDto>> GetAllProduct()
@@ -68,10 +69,6 @@ namespace MusicalStore.Application.Services.Implements
                 product.ProductName = request.ProductName;
                 product.PriceOld = request.PriceOld;
                 product.PriceNew = request.PriceNew;
-                if (request.uploadFile != null)
-                {
-                    product.Thumbnail = await UploadImage(request.uploadFile);
-                }
                 product.Description = request.Description;
                 product.Quantity = request.Quantity;
                 product.DateCreated = DateTime.Now;
@@ -103,10 +100,6 @@ namespace MusicalStore.Application.Services.Implements
                 find.ProductName = request.ProductName;
                 find.PriceOld = request.PriceOld;
                 find.PriceNew = request.PriceNew;
-                if (request.uploadFile != null)
-                {
-                    find.Thumbnail = await UploadImage(request.uploadFile);
-                }
                 find.Description = request.Description;
                 find.Quantity = request.Quantity;
                 find.ModifiedDate = DateTime.Now;
@@ -132,6 +125,26 @@ namespace MusicalStore.Application.Services.Implements
                 responseMessage.StatusCode = 500;
                 return responseMessage;
             }
+        }
+
+        public async Task<ResponseMessage> UpdateThumbnailProduct(Guid Id, IFormFile file, string bucketName, string namefile)
+        {
+            var responseMessage = new ResponseMessage();
+            var product = await _productRepository.FindById(Id);
+            var response = await _awsS3Service.UploadFile(file, bucketName, "Product", namefile);
+            product.Thumbnail = response.PresignedUrl;
+            var update = await _productRepository.Update(product);
+            if (update > 0)
+            {
+                responseMessage.StatusCode = 200;
+                responseMessage.Message = "Update Success";
+            }
+            else
+            {
+                responseMessage.StatusCode = 200;
+                responseMessage.Message = "Update Fail";
+            }
+            return responseMessage;
         }
 
         public async Task<ResponseMessage> DeleteProduct(Guid id)
@@ -165,30 +178,11 @@ namespace MusicalStore.Application.Services.Implements
             }
         }
 
-        public async Task<string> UploadImage(UploadFile request)
+        public async Task<List<ProductDto>> GetPaginationProduct(int page)
         {
-
-            var imageFolder = $@"\uploaded\Product\images\{DateTime.Now.ToString("yyyyMMdd")}";
-
-            string folder = _webHostEnvironment.WebRootPath + imageFolder;
-
-            var nameImage = $"{request.FileName}.jpg";
-
-            if (!Directory.Exists(folder))
-            {
-                Directory.CreateDirectory(folder);
-            }
-
-            string filePath = Path.Combine(folder, nameImage);
-
-            using (FileStream fs = System.IO.File.Create(filePath))
-            {
-                fs.Write(request.Bytes, 0, request.Bytes.Length);
-                fs.Flush();
-            }
-            var pathimage = Path.Combine(imageFolder, nameImage).Replace(@"\", @"/");
-            var responseimage = "https://localhost:7099" + "/" + pathimage;
-            return responseimage;
+            var products = await _productRepository.Pagination(page);
+            var productsDto = _mapper.Map<List<ProductDto>>(products);
+            return productsDto;
         }
     }
 }

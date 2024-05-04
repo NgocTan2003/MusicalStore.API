@@ -1,4 +1,5 @@
-﻿using MusicalStore.Common.ResponseBase;
+﻿using Microsoft.AspNetCore.Http;
+using MusicalStore.Common.ResponseBase;
 using MusicalStore.Dtos.FeedBacks;
 using MusicalStore.Dtos.Galleries;
 using System;
@@ -16,6 +17,7 @@ namespace MusicalStore.Application.Services.Interfaces
         Task<List<GalleryDto>> GetGalleryByProduct(Guid ProductId);
         Task<ResponseMessage> CreateGallery(CreateGallery request);
         Task<ResponseMessage> UpdateGallery(UpdateGallery request);
+        Task<ResponseMessage> UpdateThumbnailGallery(Guid Id, IFormFile file, string bucketName, string namefile);
         Task<ResponseMessage> DeleteGallery(Guid id);
     }
 }

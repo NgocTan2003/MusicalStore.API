@@ -12,8 +12,8 @@ using MusicalStore.Data.EF;
 namespace MusicalStore.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20240314081633_UpdateTableOrder2")]
-    partial class UpdateTableOrder2
+    [Migration("20240419162009_init")]
+    partial class init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -218,8 +218,17 @@ namespace MusicalStore.Data.Migrations
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("bit");
 
+                    b.Property<string>("RefreshToken")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("RefreshTokenExpirationTime")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("TokenExpirationTime")
+                        .HasColumnType("datetime2");
 
                     b.Property<bool>("TwoFactorEnabled")
                         .HasColumnType("bit");

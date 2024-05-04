@@ -12,8 +12,8 @@ using MusicalStore.Data.EF;
 namespace MusicalStore.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20240329085432_updateTableAppUser293")]
-    partial class updateTableAppUser293
+    [Migration("20240422104228_seeddata1")]
+    partial class seeddata1
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -218,7 +218,7 @@ namespace MusicalStore.Data.Migrations
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("bit");
 
-                    b.Property<string>("RefeshToken")
+                    b.Property<string>("RefreshToken")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("RefreshTokenExpirationTime")
@@ -610,6 +610,47 @@ namespace MusicalStore.Data.Migrations
                     b.HasIndex("CategoryID");
 
                     b.ToTable("Products");
+                });
+
+            modelBuilder.Entity("MusicalStore.Data.Entities.Role", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Roles");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Description = "Administrator",
+                            Name = "Admin"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Description = "Manager",
+                            Name = "Manager"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Description = "Customer",
+                            Name = "Customer"
+                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

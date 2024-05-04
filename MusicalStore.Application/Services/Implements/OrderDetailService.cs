@@ -183,6 +183,13 @@ namespace MusicalStore.Application.Services.Implements
 
             return responseMessage;
         }
+
+        public async Task<List<OrderDetailDto>> GetPaginationOrderDetail(int page)
+        {
+            var orderDetails = await _orderDetailRepository.Pagination(page);
+            var orderDetailsDto = _mapper.Map<List<OrderDetailDto>>(orderDetails);
+            return orderDetailsDto;
+        }
     }
 
 }

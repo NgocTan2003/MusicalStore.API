@@ -12,6 +12,7 @@ namespace MusicalStore.Application.Services.Interfaces
     public interface IOrderDetailService
     {
         Task<List<OrderDetailDto>> GetAllOrderDetail();
+        Task<List<OrderDetailDto>> GetPaginationOrderDetail(int page);
         Task<List<OrderDetailDto>> GetOrderDetailByOrder(Guid id);
         Task<OrderDetailDto> GetOrderDetailByID(Guid orderID, Guid productID);
         Task<ResponseMessage> CreateOrderDetail(CreateOrderDetail request);

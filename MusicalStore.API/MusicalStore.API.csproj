@@ -24,6 +24,7 @@
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
 	  <ProjectReference Include="..\MusicalStore.Application\MusicalStore.Application.csproj" />
+	  <ProjectReference Include="..\MusicalStore.Common\MusicalStore.Common.csproj" />
 	</ItemGroup>
 
 </Project>

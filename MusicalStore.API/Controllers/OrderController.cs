@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using MusicalStore.Application.AutoConfiguration;
+using MusicalStore.Application.Services.Implements;
 using MusicalStore.Application.Services.Interfaces;
 using MusicalStore.Dtos.Galleries;
 using MusicalStore.Dtos.Orders;
@@ -27,6 +28,21 @@ namespace MusicalStore.API.Controllers
             try
             {
                 var orders = await _orderService.GetAllOrder();
+                return Ok(orders);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Message = ex.Message });
+            }
+        }
+
+
+        [HttpGet("Pagination")]
+        public async Task<IActionResult> GetPaginationOrder(int page)
+        {
+            try
+            {
+                var orders = await _orderService.GetPaginationOrder(page);
                 return Ok(orders);
             }
             catch (Exception ex)

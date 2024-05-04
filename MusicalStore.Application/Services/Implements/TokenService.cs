@@ -22,13 +22,11 @@ public class TokenService : ITokenService
     private readonly IConfiguration _config;
     private readonly UserManager<AppUser> _userManager;
     private readonly DataContext _context;
-    private readonly IUserRepository _userRepository;
-    public TokenService(DataContext context, IConfiguration config, UserManager<AppUser> userManager, IUserRepository userRepository)
+    public TokenService(DataContext context, IConfiguration config, UserManager<AppUser> userManager)
     {
         _context = context;
         _config = config;
         _userManager = userManager;
-        _userRepository = userRepository;
     }
 
     public string GenerateAccessToken(ClaimUserLogin request)
@@ -42,14 +40,13 @@ public class TokenService : ITokenService
         };
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["JWT:Key"]));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+        var time = int.TryParse(_config["JWT:TokenExpirationTime"], out int tokenExpirationTime);
 
-        var token = new JwtSecurityToken(
-                issuer: _config["JWT:ValidIssuer"],
-                audience: _config["JWT:ValidAudience"],
-                expires: DateTime.Now.AddMinutes(2),
-                claims: claims,
-                signingCredentials: creds
-            );
+        var token = new JwtSecurityToken(_config["JWT:ValidIssuer"],
+           _config["JWT:ValidIssuer"],
+           claims,
+           expires: DateTime.Now.AddMinutes(tokenExpirationTime),
+           signingCredentials: creds);
 
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
@@ -72,7 +69,7 @@ public class TokenService : ITokenService
             ValidateIssuer = false,
             ValidateIssuerSigningKey = true,
             ValidIssuer = _config["JWT:ValidIssuer"],
-            ValidAudience = _config["JWT:ValidAudience"],
+            ValidAudience = _config["JWT:ValidIssuer"],
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["JWT:Key"])),
             ValidateLifetime = true
         };
@@ -90,72 +87,63 @@ public class TokenService : ITokenService
             string accessToken = tokenApiModel.AccessToken;
             string refreshToken = tokenApiModel.RefreshToken;
             var principal = GetPrincipalFromExpiredToken(accessToken);
-            //var claimUserLogin = GetClaimUserLoginFromPrincipal(principal);
-            //var username = claimUserLogin.UserName;
-            //result.UserName = principal.Identity.Name;
-            //if (principal == null)
-            //{
-            //    return result;
-            //}
-            //var user = await _userRepository.GetUserByUsername(username);
-            //var roles = await _userRepository.GetAllRoleByName(username);
-            //if (user == null)
-            //{
-            //    result.Message = "No user found";
-            //    return result;
-            //}
-            //else if (user.RefeshToken != refreshToken)
-            //{
-            //    result.Message = "The Refeshtoken code is not correct";
-            //    return result;
-            //}
-            //else if (user.ExpiryTime <= DateTime.Now)
-            //{
-            //    result.Message = "Token has not expired";
-            //    return result;
-            //}
+            var username = principal.Identity.Name;
 
-            //var utcExpireDate = long.Parse(principal.Claims.FirstOrDefault(x => x.Type == "exp").Value);
-            //var expireDate = ConvertUnixTimeToDateTime(utcExpireDate);
-            //var dateNow = DateTime.Now;
-            //// nếu token chưa hết hạn thì return về token cũ 
-            //if (expireDate > dateNow)
-            //{
-            //    result.UserName = user.UserName;
-            //    result.AccessToken = tokenApiModel.AccessToken;
-            //    result.RefeshToken = tokenApiModel.RefreshToken;
-            //    return result;
-            //}
+            var user = await _userManager.FindByNameAsync(username);
+            var roles = await _userManager.GetRolesAsync(user);
+            if (user == null)
+            {
+                result.Message = "No user found";
+                return result;
+            }
+            else if (user.RefreshToken != refreshToken)
+            {
+                result.Message = "The Refeshtoken code is not correct";
+                return result;
+            }
+            else if (user.RefreshTokenExpirationTime <= DateTime.Now)
+            {
+                result.Message = "Refreshtoken has expired";
+                return result;
+            }
+            else if (user.TokenExpirationTime >= DateTime.Now)
+            {
+                result.Message = "Token has not expired";
+                result.UserName = user.UserName;
+                result.AccessToken = tokenApiModel.AccessToken;
+                result.RefreshToken = tokenApiModel.RefreshToken;
+                return result;
+            }
 
-            //// nếu token đã hết hạn
-            //var request = new ClaimUserLogin()
-            //{
-            //    UserName = user.UserName,
-            //    Email = user.UserName,
-            //    Roles = roles
-            //};
-            //var newAccessToken = GenerateAccessToken(request);
-            //var newRefreshToken = GenerateRefreshToken();
-            //user.RefeshToken = newRefreshToken;
-            //_context.SaveChanges();
+            // nếu token đã hết hạn
+            var request = new ClaimUserLogin()
+            {
+                UserName = user.UserName,
+                Email = user.UserName,
+                Roles = roles
+            };
+            var tokenTime = int.TryParse(_config["JWT:TokenExpirationTime"], out int tokenExpirationTime);
+            var refreshtoken= int.TryParse(_config["JWT:RefreshTokenExpirationTime"], out int refreshtokenExpirationTime);
+            var newAccessToken = GenerateAccessToken(request);
+            var newRefreshToken = GenerateRefreshToken();
+            user.RefreshToken = newRefreshToken;
+            user.TokenExpirationTime = DateTime.Now.AddMinutes(tokenExpirationTime);
+            user.RefreshTokenExpirationTime = DateTime.Now.AddMinutes(refreshtokenExpirationTime);
+            _context.SaveChanges();
+            await _userManager.UpdateAsync(user);
 
-            //result.UserName = username;
-            //result.AccessToken = newAccessToken;
-            //result.RefeshToken = newRefreshToken;
-            //result.StatusCode = 200;
+            result.UserName = username;
+            result.AccessToken = newAccessToken;
+            result.RefreshToken = newRefreshToken;
+            result.TokenExpiration = DateTime.Now.AddMinutes(tokenExpirationTime);
+            result.RefreshTokenExpiration = DateTime.Now.AddMinutes(refreshtokenExpirationTime);
+            result.StatusCode = 200;
             return result;
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             result.Message = ex.Message;
             return result;
         }
-    }
-
-    public DateTime ConvertUnixTimeToDateTime(long utcExpireDate)
-    {
-        DateTime dateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
-        dateTime = dateTime.AddSeconds(utcExpireDate).ToLocalTime();
-        return dateTime;
     }
 }

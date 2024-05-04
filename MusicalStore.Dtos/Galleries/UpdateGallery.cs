@@ -15,8 +15,7 @@ namespace MusicalStore.Dtos.Galleries
         [Required(ErrorMessage = "ProductId is required")]
         public Guid ProductID { get; set; }
         public string? Thumbnail { get; set; }
-        public UploadFile? UploadFile { get; set; }
-
+ 
         public string? CreateBy { get; set; }
         public DateTime DateCreated { get; set; }
         public string? UpdateBy { get; set; }

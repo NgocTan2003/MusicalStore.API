@@ -1,4 +1,5 @@
-﻿using MusicalStore.Dtos.AppRole;
+﻿using MusicalStore.Data.Entities;
+using MusicalStore.Dtos.AppRole;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +10,7 @@ namespace MusicalStore.Application.Repositories.Interfaces
 {
     public interface IRoleRepository
     {
-        Task<List<string>> GetAll();
+        Task<List<Role>> GetAll();
         Task<bool> CheckPermission(PermissionInput permissionInput);
         Task<CheckPermission> ChangePermission(PermissionInput request);
     }

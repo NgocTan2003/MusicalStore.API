@@ -16,7 +16,7 @@ namespace MusicalStore.Data.Entities
         [Required]
         public Gender Gender { get; set; }
         public string? Avatar { get; set; }
-        public string? RefeshToken { get; set; }
+        public string? RefreshToken { get; set; }
         public DateTime? TokenExpirationTime { get; set; }
         public DateTime? RefreshTokenExpirationTime { get; set; }
 

@@ -7,6 +7,7 @@ using MusicalStore.Common.ResponseBase;
 using MusicalStore.Data.Entities;
 using MusicalStore.Dtos.Categories;
 using MusicalStore.Dtos.FeedBacks;
+using MusicalStore.Dtos.Products;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -150,6 +151,13 @@ namespace MusicalStore.Application.Services.Implements
             }
 
             return responseMessage;
+        }
+
+        public async Task<List<FeedBackDto>> GetPaginationFeedBack(int page)
+        {
+            var feedbacks = await _feedBackRepository.Pagination(page);
+            var feedbacksDto = _mapper.Map<List<FeedBackDto>>(feedbacks);
+            return feedbacksDto;
         }
     }
 }

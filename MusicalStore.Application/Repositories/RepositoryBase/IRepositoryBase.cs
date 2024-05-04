@@ -16,6 +16,7 @@ namespace MusicalStore.Application.Repositories.RepositoryBase
             Task<int> Create(T entity);
             Task<int> Update(T entity);
             Task<int> Delete(Guid Id);
+            Task<List<T>> Pagination(int page = 1);
         }
     }
 }

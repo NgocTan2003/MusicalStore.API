@@ -36,6 +36,21 @@ namespace MusicalStore.API.Controllers
             }
         }
 
+        [HttpGet("Pagination")]
+        public async Task<IActionResult> GetPaginationFeedBack(int page)
+        {
+            try
+            {
+                var feedbacks = await _feedBackService.GetPaginationFeedBack(page);
+                return Ok(feedbacks);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Message = ex.Message });
+            }
+        }
+
+
         [HttpGet("id")]
         public async Task<IActionResult> GetByID(Guid id)
         {
@@ -59,7 +74,7 @@ namespace MusicalStore.API.Controllers
 
         [HttpPost("Create")]
         [Authorize]
-         public async Task<IActionResult> CreateFeedBack([FromBody] CreateFeedback request)
+        public async Task<IActionResult> CreateFeedBack([FromBody] CreateFeedback request)
         {
             try
             {

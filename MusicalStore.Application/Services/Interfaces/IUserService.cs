@@ -1,4 +1,5 @@
-﻿using MusicalStore.Application.AutoConfiguration;
+﻿using Microsoft.AspNetCore.Http;
+using MusicalStore.Application.AutoConfiguration;
 using MusicalStore.Common.ResponseBase;
 using MusicalStore.Data.Entities;
 using MusicalStore.Dtos.Users;
@@ -14,17 +15,14 @@ namespace MusicalStore.Application.Services.Interfaces
     {
         Task<TokenResponse> Authentication(AuthenticationRequest request);
         Task<TokenResponse> AuthenticationOTP(string code, string username);
-        Task<ResponseMessage> SendEmailOTP(string username, string password);
         Task<ResponseMessage> ForgotPassword(string EmailForgotPassword);
         Task<ResponseMessage> ResetPassword(ResetPassword resetPassword);
         Task<ResponseMessage> ChangePassword(ChangePassword changePassword);
         Task<List<UserDto>> GetAllUser();
         Task<UserDto> GetUserById(string id);
-        Task<UserDto?> GetUserByUsername(string username);
-        Task<UserDto?> GetUserByEmail(string email);
-        Task<IList<string>> GetAllRoleByName(string UserName);
         Task<ResponseCreateUser> CreateUser(RegisterRequest request);
         Task<ResponseMessage> UpdateUser(UpdateUser request);
+        Task<ResponseMessage> UpdateAvatar(string username, IFormFile file, string bucketName, string? prefix, string? namefile);
         Task<ResponseMessage> DeleteUser(string id);
     }
 }

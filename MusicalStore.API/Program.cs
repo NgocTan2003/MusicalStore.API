@@ -1,4 +1,5 @@
-﻿using AutoMapper;
+﻿using Amazon.S3;
+using AutoMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -23,30 +24,37 @@ builder.Services.AddHttpContextAccessor();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(option =>
+
+// cấu hình cho Swangger 
+builder.Services.AddSwaggerGen(c =>
 {
-    option.SwaggerDoc("v1", new OpenApiInfo { Title = "Musical Store API", Version = "v1" });
-    option.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
-        In = ParameterLocation.Header,
-        Description = "Please enter a valid token",
+        Description = @"JWT Authorization header using the Bearer scheme. \r\n\r\n
+                      Enter 'Bearer' [space] and then your token in the text input below.
+                      \r\n\r\nExample: 'Bearer 12345abcdef'",
         Name = "Authorization",
-        Type = SecuritySchemeType.Http,
-        BearerFormat = "JWT",
-        Scheme = "Bearer"
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.ApiKey,
+        Scheme = "Bearer",
+        BearerFormat = "JWT" // Thêm định dạng token
     });
-    option.AddSecurityRequirement(new OpenApiSecurityRequirement
+    // Thêm yêu cầu bảo mật cho token
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
         {
             new OpenApiSecurityScheme
             {
                 Reference = new OpenApiReference
                 {
-                    Type=ReferenceType.SecurityScheme,
-                    Id="Bearer"
-                }
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                },
+                Scheme = "oauth2",
+                Name = "Bearer",
+                In = ParameterLocation.Header,
             },
-            new string[]{}
+            new List<string>()
         }
     });
 });
@@ -57,18 +65,19 @@ builder.Services.AddIdentity<AppUser, IdentityRole>()
 
 builder.Services.AddDbContext<DataContext>(options =>
     options.UseSqlServer(
-        builder.Configuration.GetConnectionString("DefaultConnection")), ServiceLifetime.Transient);
-
+        builder.Configuration.GetConnectionString("DefaultConnection")));
+ 
 // Add config for Required Email(bắt buộc phải xác minh email ms cho login)
 builder.Services.Configure<IdentityOptions>(opts => opts.SignIn.RequireConfirmedEmail = true);
 
-// set mã tbao cho dvu gửi mail ForgotPassword sẽ sống trong vòng 1h
-builder.Services.Configure<DataProtectionTokenProviderOptions>(opts => opts.TokenLifespan = TimeSpan.FromHours(1));
+// set thời gian sống mã OTP cho dvu gửi mail 
+builder.Services.Configure<DataProtectionTokenProviderOptions>(opts => opts.TokenLifespan = TimeSpan.FromMinutes(2));
 
+// nếu tk bị khóa sau khi hết tgian khóa tk sẽ không tự động unlock
 builder.Services.Configure<IdentityOptions>(options =>
 {
-    options.Lockout.MaxFailedAccessAttempts = 5; 
-    options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5); 
+    options.Lockout.MaxFailedAccessAttempts = 5;
+    options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
 });
 
 
@@ -99,31 +108,36 @@ builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IRoleRepository, RoleRepository>();
 builder.Services.AddScoped<IRoleService, RoleService>();
 builder.Services.AddTransient<IEmailService, EmailService>();
+builder.Services.AddTransient<IAwsS3Service, AwsS3Service>();
+builder.Services.AddTransient<IBucketService, BucketService>();
 
-builder.Services.AddAuthentication(options =>
+builder.Services.AddAuthentication(opt =>
 {
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+    opt.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    opt.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+          .AddJwtBearer(options =>
+          {
+              options.RequireHttpsMetadata = false;
+              options.SaveToken = true;
+              options.TokenValidationParameters = new TokenValidationParameters()
+              {
+                  ValidateIssuer = true,
+                  ValidIssuer = builder.Configuration["JWT:ValidIssuer"],
+                  ValidateAudience = true,
+                  ValidAudience = builder.Configuration["JWT:ValidIssuer"],
+                  ValidateLifetime = true,
+                  ValidateIssuerSigningKey = true,
+                  ClockSkew = System.TimeSpan.Zero,
+                  IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:Key"]))
+              };
+          });
 
-}).AddJwtBearer(options =>
-{
-    options.SaveToken = true;
-    options.RequireHttpsMetadata = true;
-    options.TokenValidationParameters = new TokenValidationParameters
-    {
-        ValidateIssuer = true,
-        ValidateAudience = true,
-        ValidAudience = builder.Configuration["JWT:ValidAudience"],
-        ValidIssuer = builder.Configuration["JWT:ValidIssuer"],
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:Key"]))
-    };
-});
-
-
-
+builder.Services.AddDefaultAWSOptions(builder.Configuration.GetAWSOptions());
+builder.Services.AddAWSService<IAmazonS3>();
 
 var app = builder.Build();
+
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

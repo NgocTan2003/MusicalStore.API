@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using MusicalStore.Application.Repositories.Implements;
 using MusicalStore.Application.Repositories.Interfaces;
@@ -23,14 +24,14 @@ namespace MusicalStore.Application.Services.Implements
         private readonly IGalleryRepository _galleryRepository;
         private readonly IProductRepository _productRepository;
         private readonly IMapper _mapper;
-        private readonly IWebHostEnvironment _webHostEnvironment;
+        private readonly IAwsS3Service _awsS3Service;
 
-        public GalleryService(IGalleryRepository galleryRepository, IProductRepository productRepository, IMapper mapper, IWebHostEnvironment webHostEnvironment)
+        public GalleryService(IGalleryRepository galleryRepository, IProductRepository productRepository, IMapper mapper, IAwsS3Service awsS3Service)
         {
             _galleryRepository = galleryRepository;
             _productRepository = productRepository;
             _mapper = mapper;
-            _webHostEnvironment = webHostEnvironment;
+            _awsS3Service = awsS3Service;
         }
 
         public async Task<List<GalleryDto>> GetAllGallery()
@@ -69,16 +70,11 @@ namespace MusicalStore.Application.Services.Implements
             {
                 Gallery gallery = new();
                 gallery.ProductID = request.ProductID;
-                if (request.UploadFile != null)
-                {
-                    gallery.Thumbnail = await UploadImage(request.UploadFile);
-                }
                 gallery.DateCreated = DateTime.Now;
                 gallery.CreateBy = request.CreateBy;
 
                 var create = await _galleryRepository.Create(gallery);
-
-                if (create>0)
+                if (create > 0)
                 {
                     responseMessage.StatusCode = 200;
                     responseMessage.Message = "Success";
@@ -91,7 +87,6 @@ namespace MusicalStore.Application.Services.Implements
             }
             return responseMessage;
         }
-
 
         public async Task<ResponseMessage> UpdateGallery(UpdateGallery request)
         {
@@ -107,15 +102,10 @@ namespace MusicalStore.Application.Services.Implements
             else
             {
                 gallery.ProductID = request.ProductID;
-                if (request.UploadFile != null)
-                {
-                    gallery.Thumbnail = await UploadImage(request.UploadFile);
-                }
                 gallery.ModifiedDate = DateTime.Now;
                 gallery.UpdateBy = request.UpdateBy;
 
                 var update = await _galleryRepository.Update(gallery);
-
                 if (update > 0)
                 {
                     responseMessage.StatusCode = 200;
@@ -127,7 +117,26 @@ namespace MusicalStore.Application.Services.Implements
                     responseMessage.Message = "Fail";
                 }
             }
+            return responseMessage;
+        }
 
+        public async Task<ResponseMessage> UpdateThumbnailGallery(Guid Id, IFormFile file, string bucketName, string namefile)
+        {
+            var responseMessage = new ResponseMessage();
+            var gallery = await _galleryRepository.FindById(Id);
+            var response = await _awsS3Service.UploadFile(file, bucketName, "Gallery", namefile);
+            gallery.Thumbnail = response.PresignedUrl;
+            var update = await _galleryRepository.Update(gallery);
+            if (update > 0)
+            {
+                responseMessage.StatusCode = 200;
+                responseMessage.Message = "Update Success";
+            }
+            else
+            {
+                responseMessage.StatusCode = 200;
+                responseMessage.Message = "Update Fail";
+            }
             return responseMessage;
         }
 
@@ -155,32 +164,7 @@ namespace MusicalStore.Application.Services.Implements
                     responseMessage.Message = "Fail";
                 }
             }
-
             return responseMessage;
-        }
-
-        public async Task<string> UploadImage(UploadFile request)
-        {
-            var imageFolder = $@"\uploaded\Gallery\images\{DateTime.Now.ToString("yyyyMMdd")}";
-
-            string folder = _webHostEnvironment.WebRootPath + imageFolder;
-            var nameImage = $"{request.FileName}.jpg";
-
-            if (!Directory.Exists(folder))
-            {
-                Directory.CreateDirectory(folder);
-            }
-
-            string filePath = Path.Combine(folder, nameImage);
-
-            using (FileStream fs = System.IO.File.Create(filePath))
-            {
-                fs.Write(request.Bytes, 0, request.Bytes.Length);
-                fs.Flush();
-            }
-            var pathimage = Path.Combine(imageFolder, nameImage).Replace(@"\", @"/");
-            var responseimage = "https://localhost:7099" + "/" + pathimage;
-            return responseimage;
         }
     }
 }

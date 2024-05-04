@@ -106,6 +106,31 @@ namespace MusicalStore.API.Controllers
             }
         }
 
+        [HttpPut("UpdateThumnail")]
+        [Authorize]
+        public async Task<IActionResult> UpdateThumnailGallery(Guid Id, IFormFile file, string bucketName, string namefile)
+        {
+            try
+            {
+                var hasAccess = await AuthorizationHelper.CheckAccess(_httpContextAccessor.HttpContext, "Gallery", "Update");
+
+                if (hasAccess.StatusCode == 200)
+                {
+                    var update = await _galleryService.UpdateThumbnailGallery(Id, file, bucketName, namefile);
+                    return Ok(update);
+                }
+                else
+                {
+                    return Ok(hasAccess);
+                }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = ex.Message });
+
+            }
+        }
+
         [HttpDelete("id")]
         [Authorize]
         public async Task<IActionResult> Delete(Guid id)

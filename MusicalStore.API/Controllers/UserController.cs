@@ -15,6 +15,7 @@ using MusicalStore.Data.Enums;
 using MusicalStore.Dtos.AppRole;
 using MusicalStore.Dtos.Users;
 using Org.BouncyCastle.Asn1.Ocsp;
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 
 namespace MusicalStore.API.Controllers
@@ -30,7 +31,7 @@ namespace MusicalStore.API.Controllers
         private readonly ITokenService _tokenService;
         private readonly DataContext _context;
 
-        public UserController(IUserService userService, IHttpContextAccessor httpContextAccessor, IEmailService emailService, 
+        public UserController(IUserService userService, IHttpContextAccessor httpContextAccessor, IEmailService emailService,
             UserManager<AppUser> userManager, ITokenService tokenService, DataContext context)
         {
             _userService = userService;
@@ -47,20 +48,6 @@ namespace MusicalStore.API.Controllers
             try
             {
                 var auth = await _userService.Authentication(request);
-                return Ok(auth);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new TokenResponse() { AccessToken = "lỗi rồi", Message = ex.Message, UserName = null });
-            }
-        }
-
-        [HttpPost("SendEmailOTP")]
-        public async Task<IActionResult> SendEmailOTP(string username, string password)
-        {
-            try
-            {
-                var auth = await _userService.SendEmailOTP(username, password);
                 return Ok(auth);
             }
             catch (Exception ex)
@@ -219,6 +206,21 @@ namespace MusicalStore.API.Controllers
                 {
                     return Ok(hasAccess);
                 }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = ex.Message });
+            }
+        }
+
+        [HttpPut("UpdateAvatar")]
+        [Authorize]
+        public async Task<IActionResult> UpdateAvatar(string username, IFormFile file, string bucketName, string? prefix, string? namefile)
+        {
+            try
+            {
+                var result = await _userService.UpdateAvatar(username, file, bucketName, prefix, namefile);
+                return Ok(result);
             }
             catch (Exception ex)
             {

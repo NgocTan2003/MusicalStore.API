@@ -7,6 +7,7 @@ using MusicalStore.Common.ResponseBase;
 using MusicalStore.Data.Entities;
 using MusicalStore.Dtos.Galleries;
 using MusicalStore.Dtos.Orders;
+using MusicalStore.Dtos.Products;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -145,6 +146,13 @@ namespace MusicalStore.Application.Services.Implements
             }
 
             return responseMessage;
+        }
+
+        public async Task<List<OrderDto>> GetPaginationOrder(int page)
+        {
+            var orders = await _orderRepository.Pagination(page);
+            var ordersDto = _mapper.Map<List<OrderDto>>(orders);
+            return ordersDto;
         }
     }
 }
