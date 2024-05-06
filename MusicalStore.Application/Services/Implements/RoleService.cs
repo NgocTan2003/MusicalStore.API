@@ -22,7 +22,7 @@ namespace MusicalStore.Application.Services.Implements
             _roleRepository = roleRepository;
         }
 
-        public async Task<List<Role>> GetAll()
+        public async Task<List<IdentityRole>> GetAll()
         {
             var list = await _roleRepository.GetAll();
             return list;

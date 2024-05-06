@@ -1,4 +1,5 @@
-﻿using MusicalStore.Data.Entities;
+﻿using Microsoft.AspNetCore.Identity;
+using MusicalStore.Data.Entities;
 using MusicalStore.Dtos.AppRole;
 using System;
 using System.Collections.Generic;
@@ -10,7 +11,7 @@ namespace MusicalStore.Application.Repositories.Interfaces
 {
     public interface IRoleRepository
     {
-        Task<List<Role>> GetAll();
+        Task<List<IdentityRole>> GetAll();
         Task<bool> CheckPermission(PermissionInput permissionInput);
         Task<CheckPermission> ChangePermission(PermissionInput request);
     }

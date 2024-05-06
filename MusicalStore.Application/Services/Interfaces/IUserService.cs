@@ -20,6 +20,7 @@ namespace MusicalStore.Application.Services.Interfaces
         Task<ResponseMessage> ChangePassword(ChangePassword changePassword);
         Task<List<UserDto>> GetAllUser();
         Task<UserDto> GetUserById(string id);
+        Task<bool> CheckCreateRole(string nameRole);
         Task<ResponseCreateUser> CreateUser(RegisterRequest request);
         Task<ResponseMessage> UpdateUser(UpdateUser request);
         Task<ResponseMessage> UpdateAvatar(string username, IFormFile file, string bucketName, string? prefix, string? namefile);

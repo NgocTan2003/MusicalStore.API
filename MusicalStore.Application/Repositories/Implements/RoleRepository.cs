@@ -26,21 +26,10 @@ namespace MusicalStore.Application.Repositories.Implements
             _context = context;
         }
 
-        public async Task<List<Role>> GetAll()
+        public async Task<List<IdentityRole>> GetAll()
         {
-            //var list = new List<string>();
-            //Type appRoleType = typeof(AppRole);
-            //FieldInfo[] fields = appRoleType.GetFields(BindingFlags.Public | BindingFlags.Static);
-
-            //foreach (FieldInfo field in fields)
-            //{
-            //    if (field.FieldType == typeof(string))
-            //    {
-            //        list.Add((string)field.GetValue(null));
-            //    }
-            //}
-            //return list;
-            return await _context.Roles.ToListAsync();
+            var list = await _context.Roles.ToListAsync();
+            return list;
         }
 
         public async Task<bool> CheckPermission(PermissionInput permissionInput)
@@ -80,6 +69,6 @@ namespace MusicalStore.Application.Repositories.Implements
             return checkPermission;
         }
 
-      
+
     }
 }

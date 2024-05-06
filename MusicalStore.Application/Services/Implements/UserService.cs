@@ -45,10 +45,11 @@ namespace MusicalStore.Application.Services.Implements
         private readonly IConfiguration _config;
         private readonly DataContext _context;
         private readonly IAwsS3Service _awsS3Service;
+        private readonly RoleManager<IdentityRole> _roleManager;
 
         public UserService(IUserRepository userRepository, ICartService cartService, SignInManager<AppUser> signInManager,
             IMapper mapper, ITokenService tokenSerVice, IAwsS3Service awsS3Service, IEmailService emailService,
-            UserManager<AppUser> userManager, IConfiguration config, DataContext context)
+            UserManager<AppUser> userManager, IConfiguration config, DataContext context, RoleManager<IdentityRole> roleManager)
         {
             _userRepository = userRepository;
             _cartService = cartService;
@@ -60,6 +61,7 @@ namespace MusicalStore.Application.Services.Implements
             _userManager = userManager;
             _config = config;
             _context = context;
+            _roleManager = roleManager;
         }
         public async Task<TokenResponse> Authentication(AuthenticationRequest request)
         {
@@ -198,6 +200,28 @@ namespace MusicalStore.Application.Services.Implements
             return userDto;
         }
 
+        public async Task<bool> CheckCreateRole(string nameRole)
+        {
+            bool checkRole = false;
+            if (Role.Customer == nameRole || Role.Admin == nameRole || Role.Manager == nameRole)
+            {
+                checkRole = true;
+                if (!await _roleManager.RoleExistsAsync(nameRole) && Role.Customer == nameRole)
+                {
+                    await _roleManager.CreateAsync(new IdentityRole(Role.Customer));
+                }
+                if (!await _roleManager.RoleExistsAsync(nameRole) && Role.Manager == nameRole)
+                {
+                    await _roleManager.CreateAsync(new IdentityRole(Role.Manager));
+                }
+                if (!await _roleManager.RoleExistsAsync(nameRole) && Role.Admin == nameRole)
+                {
+                    await _roleManager.CreateAsync(new IdentityRole(Role.Admin));
+                }
+            }
+            return checkRole;
+        }
+
         public async Task<ResponseCreateUser> CreateUser(RegisterRequest request)
         {
             var result = new ResponseCreateUser();
@@ -212,14 +236,14 @@ namespace MusicalStore.Application.Services.Implements
                 return result;
             }
 
-            var roleInput = request.Role;
-            if (roleInput.Equals("Admin") || roleInput.Equals("Manager") || roleInput.Equals("Customer"))
+            var checkRole = await CheckCreateRole(request.Role);
+            if (!checkRole)
             {
                 result.StatusCode = 400;
                 result.Message = "Can not find the role";
                 return result;
             }
-
+ 
             var user = new AppUser();
             user.Id = Guid.NewGuid().ToString();
             user.UserName = request.UserName;
@@ -234,13 +258,18 @@ namespace MusicalStore.Application.Services.Implements
             await _userRepository.CreateUser(user, request.PassWord);
             if (request.Role == "Customer")
             {
-                roles.Add(roleInput);
+                roles.Add("Customer");
                 await _userRepository.AddRole(user, roles);
                 await _cartService.CreateCart(user.Id);
             }
-            else if (request.Role == "Admin")
+            else if (request.Role == "Manager")
             {
-                roles.Add(roleInput);
+                roles.Add("Manager");
+                await _userRepository.AddRole(user, roles);
+            }
+            else if (request.Role == "Administrator")
+            {
+                roles.Add("Administrator");
                 await _userRepository.AddRole(user, roles);
             }
             var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
