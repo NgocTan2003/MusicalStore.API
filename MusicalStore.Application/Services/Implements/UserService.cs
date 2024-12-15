@@ -1,34 +1,14 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using MusicalStore.Application.AutoConfiguration;
 using MusicalStore.Application.Repositories.Interfaces;
 using MusicalStore.Application.Services.Interfaces;
-using MusicalStore.Common.Enums;
 using MusicalStore.Common.ResponseBase;
 using MusicalStore.Data.EF;
 using MusicalStore.Data.Entities;
-using MusicalStore.Data.Enums;
 using MusicalStore.Dtos.Users;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Logging;
-using Microsoft.IdentityModel.Tokens;
-using Microsoft.Extensions.Configuration;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Collections;
-using System.Data;
-using MusicalStore.Dtos.Carts;
-using System.Diagnostics.Eventing.Reader;
-using MusicalStore.Application.AutoConfiguration;
-using Org.BouncyCastle.Asn1.Ocsp;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Amazon.Runtime.Internal;
 
 namespace MusicalStore.Application.Services.Implements
 {
@@ -63,6 +43,7 @@ namespace MusicalStore.Application.Services.Implements
             _context = context;
             _roleManager = roleManager;
         }
+
         public async Task<TokenResponse> Authentication(AuthenticationRequest request)
         {
             var result = new TokenResponse();

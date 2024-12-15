@@ -1,14 +1,9 @@
 ﻿using MailKit.Net.Smtp;
-using MailKit.Security;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using MimeKit;
 using MimeKit.Text;
-using MusicalStore.Application.AutoConfiguration;
 using MusicalStore.Application.Services.Interfaces;
 using MusicalStore.Common.ResponseBase;
-using MusicalStore.Data.Entities;
 
 namespace MusicalStore.Application.Services.Implements
 {

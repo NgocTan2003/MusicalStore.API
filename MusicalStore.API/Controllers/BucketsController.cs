@@ -1,15 +1,6 @@
-﻿using Amazon.Runtime.Internal;
-using Amazon.S3;
-using Amazon.S3.Model;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using MusicalStore.Application.Services.Implements;
+﻿using Microsoft.AspNetCore.Mvc;
 using MusicalStore.Application.Services.Interfaces;
-using MusicalStore.Common.Enums;
 using MusicalStore.Common.ResponseBase;
-using MusicalStore.Dtos.Users;
-using Org.BouncyCastle.Asn1.Ocsp;
-using Org.BouncyCastle.Utilities.Zlib;
 
 namespace MusicalStore.API.Controllers
 {

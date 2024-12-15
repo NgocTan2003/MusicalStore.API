@@ -12,6 +12,5 @@ namespace MusicalStore.Application.Repositories.Interfaces
     {
         Task<CartItem?> GetCartItemByID(Guid idCart, Guid idProduct);
         Task<int> DeleteCartItemByID(Guid idCart, Guid idProduct);
-
     }
 }

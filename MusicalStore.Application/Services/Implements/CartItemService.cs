@@ -1,18 +1,10 @@
 ﻿using AutoMapper;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
-using MusicalStore.Application.Repositories.Implements;
 using MusicalStore.Application.Repositories.Interfaces;
 using MusicalStore.Application.Services.Interfaces;
 using MusicalStore.Common.ResponseBase;
 using MusicalStore.Data.Entities;
 using MusicalStore.Dtos.CartItems;
-using MusicalStore.Dtos.Products;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MusicalStore.Application.Services.Implements
 {
@@ -22,16 +14,15 @@ namespace MusicalStore.Application.Services.Implements
         private readonly ICartRepository _cartRepository;
         private readonly IProductRepository _productRepository;
         private readonly IMapper _mapper;
-        private readonly IWebHostEnvironment _webHostEnvironment;
 
-        public CartItemService(ICartItemRepository cartItemRepository, ICartRepository cartRepository, IProductRepository productRepository, IMapper mapper, IWebHostEnvironment webHostEnvironment)
+        public CartItemService(ICartItemRepository cartItemRepository, ICartRepository cartRepository, IProductRepository productRepository, IMapper mapper)
         {
             _productRepository = productRepository;
             _cartRepository = cartRepository;
             _cartItemRepository = cartItemRepository;
             _mapper = mapper;
-            _webHostEnvironment = webHostEnvironment;
         }
+
         public async Task<List<CartItemDto>> GetAllCartItem()
         {
             var cartItems = await _cartItemRepository.GetAll().ToListAsync();

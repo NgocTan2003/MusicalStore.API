@@ -1,22 +1,12 @@
-﻿using AutoMapper;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using MusicalStore.Application.AutoConfiguration;
-using MusicalStore.Application.Services;
-using MusicalStore.Application.Services.Implements;
 using MusicalStore.Application.Services.Interfaces;
 using MusicalStore.Common.ResponseBase;
 using MusicalStore.Data.EF;
 using MusicalStore.Data.Entities;
-using MusicalStore.Data.Enums;
-using MusicalStore.Dtos.AppRole;
 using MusicalStore.Dtos.Users;
-using Org.BouncyCastle.Asn1.Ocsp;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
 
 namespace MusicalStore.API.Controllers
 {

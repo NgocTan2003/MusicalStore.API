@@ -1,13 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using MusicalStore.Application.AutoConfiguration;
-using MusicalStore.Application.Services.Implements;
-using MusicalStore.Application.Services.Implements;
 using MusicalStore.Application.Services.Interfaces;
-using MusicalStore.Common.ResponseBase;
 using MusicalStore.Dtos.Categories;
-using MusicalStore.Dtos.Users;
 
 namespace MusicalStore.API.Controllers
 {

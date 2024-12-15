@@ -1,6 +1,5 @@
 ﻿using AutoMapper;
 using MusicalStore.Data.Entities;
-using MusicalStore.Dtos.AppRole;
 using MusicalStore.Dtos.CartItems;
 using MusicalStore.Dtos.Carts;
 using MusicalStore.Dtos.Categories;
@@ -11,11 +10,6 @@ using MusicalStore.Dtos.Orders;
 using MusicalStore.Dtos.Permissions;
 using MusicalStore.Dtos.Products;
 using MusicalStore.Dtos.Users;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MusicalStore.Application.AutoConfiguration
 {
@@ -33,7 +27,6 @@ namespace MusicalStore.Application.AutoConfiguration
             CreateMap<Category, CategoryDto>().ReverseMap();
             CreateMap<Cart, CartDto>().ReverseMap();
             CreateMap<CartItem, CartItemDto>().ReverseMap();
-
         }
     }
 }

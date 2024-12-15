@@ -14,7 +14,7 @@ using MusicalStore.Application.Services.Interfaces;
 using MusicalStore.Data.EF;
 using MusicalStore.Data.Entities;
 using System.Text;
-
+ 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -66,7 +66,12 @@ builder.Services.AddIdentity<AppUser, IdentityRole>()
 builder.Services.AddDbContext<DataContext>(options =>
     options.UseSqlServer(
         builder.Configuration.GetConnectionString("DefaultConnection")));
- 
+
+//builder.Services.AddDbContext<DataContext>(options =>
+//{
+//    options.UseMySql(builder.Configuration.GetConnectionString("DefaultConnection"), ServerVersion.AutoDetect(builder.Configuration.GetConnectionString("DefaultConnection")));
+//});
+
 // Add config for Required Email(bắt buộc phải xác minh email ms cho login)
 builder.Services.Configure<IdentityOptions>(opts => opts.SignIn.RequireConfirmedEmail = true);
 
@@ -110,7 +115,7 @@ builder.Services.AddScoped<IRoleService, RoleService>();
 builder.Services.AddTransient<IEmailService, EmailService>();
 builder.Services.AddTransient<IAwsS3Service, AwsS3Service>();
 builder.Services.AddTransient<IBucketService, BucketService>();
-
+ 
 builder.Services.AddAuthentication(opt =>
 {
     opt.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -136,10 +141,23 @@ builder.Services.AddAuthentication(opt =>
 builder.Services.AddDefaultAWSOptions(builder.Configuration.GetAWSOptions());
 builder.Services.AddAWSService<IAmazonS3>();
 
+// Thêm dịch vụ CORS vào container
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowOrigin", builder =>
+    {
+        builder.WithOrigins("http://localhost:8080")
+               .AllowAnyHeader()
+               .AllowAnyMethod();
+    });
+});
+
 var app = builder.Build();
 
 
 // Configure the HTTP request pipeline.
+app.UseCors("AllowOrigin");
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();

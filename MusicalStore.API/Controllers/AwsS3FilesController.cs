@@ -1,8 +1,5 @@
-﻿using Amazon.S3.Model;
-using Amazon.S3;
-using Microsoft.AspNetCore.Http;
+﻿using Amazon.S3;
 using Microsoft.AspNetCore.Mvc;
-using MusicalStore.Common.Enums;
 using MusicalStore.Application.Services.Interfaces;
 using MusicalStore.Common.ResponseBase;
 

@@ -1,10 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Mvc;
 using MusicalStore.Application.Services.Interfaces;
-using MusicalStore.Data.EF;
-using MusicalStore.Data.Entities;
 using MusicalStore.Dtos.Users;
 
 namespace MusicalStore.API.Controllers

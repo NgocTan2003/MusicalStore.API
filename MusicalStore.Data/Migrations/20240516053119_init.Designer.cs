@@ -12,8 +12,8 @@ using MusicalStore.Data.EF;
 namespace MusicalStore.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20240506095115_Init")]
-    partial class Init
+    [Migration("20240516053119_init")]
+    partial class init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {

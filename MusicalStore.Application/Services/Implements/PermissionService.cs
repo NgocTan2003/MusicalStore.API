@@ -3,13 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using MusicalStore.Application.Repositories.Interfaces;
 using MusicalStore.Application.Services.Interfaces;
 using MusicalStore.Common.ResponseBase;
-using MusicalStore.Dtos.Galleries;
 using MusicalStore.Dtos.Permissions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MusicalStore.Application.Services.Implements
 {

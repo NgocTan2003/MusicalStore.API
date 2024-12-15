@@ -1,19 +1,9 @@
-﻿using AutoMapper;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using MusicalStore.Application.Repositories.Interfaces;
 using MusicalStore.Data.EF;
-using MusicalStore.Data.Entities;
-using MusicalStore.Data.Enums;
 using MusicalStore.Dtos.AppRole;
-using System;
-using System.Collections.Generic;
 using System.Data;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Collections.Specialized.BitVector32;
 
 namespace MusicalStore.Application.Repositories.Implements
 {

@@ -1,9 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using MusicalStore.Application.Services.Interfaces;
-using MusicalStore.Common.ResponseBase;
-using MusicalStore.Dtos.Carts;
-using MusicalStore.Dtos.Categories;
 
 namespace MusicalStore.API.Controllers
 {

@@ -1,21 +1,11 @@
 ﻿using AutoMapper;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using MusicalStore.Application.Repositories.Implements;
 using MusicalStore.Application.Repositories.Interfaces;
 using MusicalStore.Application.Services.Interfaces;
-using MusicalStore.Common.Enums;
 using MusicalStore.Common.ResponseBase;
 using MusicalStore.Data.Entities;
-using MusicalStore.Dtos.FeedBacks;
 using MusicalStore.Dtos.Galleries;
-using MusicalStore.Dtos.Products;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MusicalStore.Application.Services.Implements
 {

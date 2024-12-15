@@ -1,19 +1,14 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
-using MusicalStore.Application.Repositories.Interfaces;
 using MusicalStore.Application.Services.Interfaces;
 using MusicalStore.Data.EF;
 using MusicalStore.Data.Entities;
 using MusicalStore.Dtos.Users;
-using System;
-using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace MusicalStore.Application.Services.Implements;
 
