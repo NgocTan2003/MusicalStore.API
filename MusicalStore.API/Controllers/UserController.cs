@@ -2,11 +2,13 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using MusicalStore.Application.AutoConfiguration;
+using MusicalStore.Application.Services.Implements;
 using MusicalStore.Application.Services.Interfaces;
 using MusicalStore.Common.ResponseBase;
 using MusicalStore.Data.EF;
 using MusicalStore.Data.Entities;
 using MusicalStore.Dtos.Users;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace MusicalStore.API.Controllers
 {
@@ -20,9 +22,10 @@ namespace MusicalStore.API.Controllers
         private readonly UserManager<AppUser> _userManager;
         private readonly ITokenService _tokenService;
         private readonly DataContext _context;
+        private readonly IBlacklistTokenService _blacklistTokenService;
 
         public UserController(IUserService userService, IHttpContextAccessor httpContextAccessor, IEmailService emailService,
-            UserManager<AppUser> userManager, ITokenService tokenService, DataContext context)
+            UserManager<AppUser> userManager, ITokenService tokenService, DataContext context, IBlacklistTokenService blacklistTokenService)
         {
             _userService = userService;
             _httpContextAccessor = httpContextAccessor;
@@ -30,9 +33,10 @@ namespace MusicalStore.API.Controllers
             _userManager = userManager;
             _tokenService = tokenService;
             _context = context;
+            _blacklistTokenService = blacklistTokenService;
         }
 
-        [HttpPost("Authentication")]
+        [HttpPost("Login")]
         public async Task<IActionResult> Authen([FromBody] AuthenticationRequest request)
         {
             try
@@ -42,11 +46,11 @@ namespace MusicalStore.API.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(new TokenResponse() { AccessToken = "lỗi rồi", Message = ex.Message, UserName = null });
+                return BadRequest(new TokenResponse() { AccessToken = "null", Message = ex.Message, UserName = null });
             }
         }
 
-        [HttpPost("Authentication-2FA")]
+        [HttpPost("Login-2FA")]
         public async Task<IActionResult> Authen2FA(string code, string username)
         {
             try
@@ -81,6 +85,7 @@ namespace MusicalStore.API.Controllers
             }
         }
 
+        // bắt event khi user bấm vào link xác nhận email 
         [HttpGet("ConfirmEmail")]
         public async Task<IActionResult> ConfirmEmail(string token, string email)
         {
@@ -98,6 +103,25 @@ namespace MusicalStore.API.Controllers
                                    new ResponseMessage { StatusCode = 500, Message = "This User Doenot exist" });
         }
 
+        // gửi email verified email 
+        [HttpGet("SendEmailConfirm")]
+        public async Task<IActionResult> SendEmailConfirm(string email)
+        {
+            try
+            {
+                var result = await _userService.SendEmailConfirm(email);
+                if (result.StatusCode == 200)
+                {
+                    return Ok(result);
+                }
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseMessage { StatusCode = 500, Message = ex.Message });
+            }
+        }
+
         [HttpPost("SendEmailForgotPassword")]
         public async Task<IActionResult> ForgotPassword(string EmailForgotPassword)
         {
@@ -112,6 +136,7 @@ namespace MusicalStore.API.Controllers
             }
         }
 
+        // sau khi ForgotPassword
         [HttpPost("ResetPassword")]
         public async Task<IActionResult> ResetPassword(ResetPassword ResetPassword)
         {
@@ -140,8 +165,8 @@ namespace MusicalStore.API.Controllers
             }
         }
 
-        [HttpGet]
         [Authorize]
+        [HttpGet("GetAllUser")]
         public async Task<IActionResult> GetAll()
         {
             try
@@ -179,8 +204,8 @@ namespace MusicalStore.API.Controllers
             }
         }
 
-        [HttpPut("Update")]
         [Authorize]
+        [HttpPut("Update")]
         public async Task<IActionResult> UpdateUser([FromBody] UpdateUser request)
         {
             try
@@ -203,8 +228,8 @@ namespace MusicalStore.API.Controllers
             }
         }
 
-        [HttpPut("UpdateAvatar")]
         [Authorize]
+        [HttpPut("UpdateAvatar")]
         public async Task<IActionResult> UpdateAvatar(string username, IFormFile file, string bucketName, string? prefix, string? namefile)
         {
             try
@@ -218,8 +243,8 @@ namespace MusicalStore.API.Controllers
             }
         }
 
-        [HttpDelete("id")]
         [Authorize]
+        [HttpDelete("Delete/{id}")]
         public async Task<IActionResult> Delete(string id)
         {
             try
@@ -235,6 +260,24 @@ namespace MusicalStore.API.Controllers
                 {
                     return Ok(hasAccess);
                 }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = ex.Message });
+            }
+        }
+
+        [HttpPost("Logout")]
+        public async Task<IActionResult> Logout([FromBody] string token)
+        {
+            try
+            {
+                var handler = new JwtSecurityTokenHandler();
+                var jwtToken = handler.ReadJwtToken(token);
+                var expirationTime = jwtToken.ValidTo;
+
+                var create = await _blacklistTokenService.AddTokenToBlacklist(token, expirationTime);
+                return Ok(create);
             }
             catch (Exception ex)
             {

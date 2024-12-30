@@ -18,6 +18,7 @@ namespace MusicalStore.Application.Services.Interfaces
         Task<ResponseMessage> ForgotPassword(string EmailForgotPassword);
         Task<ResponseMessage> ResetPassword(ResetPassword resetPassword);
         Task<ResponseMessage> ChangePassword(ChangePassword changePassword);
+        Task<ResponseMessage> SendEmailConfirm(string email);
         Task<List<UserDto>> GetAllUser();
         Task<UserDto> GetUserById(string id);
         Task<bool> CheckCreateRole(string nameRole);

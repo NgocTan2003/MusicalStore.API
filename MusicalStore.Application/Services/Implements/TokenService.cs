@@ -88,16 +88,19 @@ public class TokenService : ITokenService
             var roles = await _userManager.GetRolesAsync(user);
             if (user == null)
             {
+                result.StatusCode = 404;
                 result.Message = "No user found";
                 return result;
             }
             else if (user.RefreshToken != refreshToken)
             {
+                result.StatusCode = 400;
                 result.Message = "The Refeshtoken code is not correct";
                 return result;
             }
             else if (user.RefreshTokenExpirationTime <= DateTime.Now)
             {
+                result.StatusCode = 401;
                 result.Message = "Refreshtoken has expired";
                 return result;
             }

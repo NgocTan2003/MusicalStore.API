@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using MusicalStore.Application.Services.Interfaces;
+using MusicalStore.Common.ResponseBase;
 using MusicalStore.Dtos.Users;
 
 namespace MusicalStore.API.Controllers

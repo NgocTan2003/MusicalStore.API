@@ -24,7 +24,7 @@ namespace MusicalStore.Data.EF
         public DbSet<OrderDetail> OrderDetails { get; set; }
         public DbSet<Permission> Permissions { get; set; }
         public DbSet<Function> Functions { get; set; }
-
+        public DbSet<BlackListToken> BlackLists { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

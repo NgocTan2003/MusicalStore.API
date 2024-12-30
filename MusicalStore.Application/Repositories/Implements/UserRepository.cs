@@ -59,18 +59,38 @@ namespace MusicalStore.Application.Repositories.Implements
             }
             else
             {
+                foreach (var error in createrole.Errors)
+                {
+                    Console.WriteLine($"Error Code: {error.Code}, Description: {error.Description}");
+                }
                 return false;
             }
+
         }
 
         public async Task<bool> CreateUser(AppUser user, string password)
         {
+            //var create = await _userManager.CreateAsync(user, password);
+            //if (create.Succeeded)
+            //{
+            //    return true;
+            //}
+            //return false;
+
+
             var create = await _userManager.CreateAsync(user, password);
             if (create.Succeeded)
             {
                 return true;
             }
-            return false;
+            else
+            {
+                foreach (var error in create.Errors)
+                {
+                    Console.WriteLine($"Error Code: {error.Code}, Description: {error.Description}");
+                }
+                return false;
+            }
         }
 
         public async Task<bool> UpdateUser(AppUser user)

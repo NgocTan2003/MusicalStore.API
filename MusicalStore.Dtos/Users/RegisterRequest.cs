@@ -15,8 +15,11 @@ namespace MusicalStore.Dtos.Users
         [StringLength(100, MinimumLength = 6, ErrorMessage = "Username must be between 6 and 100 characters")]
         public string UserName { get; set; } = "";
         [Required(ErrorMessage = "Password is required")]
-        [StringLength(100, MinimumLength = 6, ErrorMessage = "Password must be between 6 and 100 characters")]
+        [StringLength(100, MinimumLength = 6, ErrorMessage = "Password must be between 6 and 100 characters.")]
+        [RegularExpression(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,100}$",
+        ErrorMessage = "Password must have at least one lowercase letter, one uppercase letter, one digit, and one special character.")]
         public string PassWord { get; set; } = "";
+
         [Required(ErrorMessage = "Email is required")]
         [EmailAddress(ErrorMessage = "Invalid email address")]
         public string Email { get; set; } = "";

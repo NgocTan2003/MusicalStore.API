@@ -47,14 +47,40 @@ namespace MusicalStore.Application.Repositories.RepositoryBase
 
         public async Task<int> Create(T entity)
         {
-            await table.AddAsync(entity);
-            return await _context.SaveChangesAsync();
+            try
+            {
+                await table.AddAsync(entity);
+                return await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateException dbEx)
+            {
+                Console.WriteLine($"Database Update Error: {dbEx.Message}");
+                throw; // Tái ném lỗi nếu cần
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"An error occurred: {ex.Message}");
+                throw; // Tái ném lỗi nếu cần
+            }
         }
 
         public async Task<int> Update(T entity)
         {
-            table.Update(entity);
-            return await _context.SaveChangesAsync();
+            try
+            {
+                table.Update(entity);
+                return await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateException dbEx)
+            {
+                Console.WriteLine($"Database Update Error: {dbEx.Message}");
+                throw; // Tái ném lỗi nếu cần
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"An error occurred: {ex.Message}");
+                throw; // Tái ném lỗi nếu cần
+            }
         }
 
         public async Task<int> Delete(Guid Id)

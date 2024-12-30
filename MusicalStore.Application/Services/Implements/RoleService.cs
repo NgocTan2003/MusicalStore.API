@@ -27,6 +27,7 @@ namespace MusicalStore.Application.Services.Implements
             bool result = await _roleRepository.CheckPermission(request);
             if (result)
             {
+                responseMessage.Message = "Bạn có quyền truy cập.";
                 responseMessage.StatusCode = 200;
             }
             else

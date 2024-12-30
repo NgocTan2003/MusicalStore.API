@@ -1,6 +1,9 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
+using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.Extensions.Configuration;
 using MusicalStore.Application.AutoConfiguration;
 using MusicalStore.Application.Repositories.Interfaces;
@@ -26,9 +29,11 @@ namespace MusicalStore.Application.Services.Implements
         private readonly DataContext _context;
         private readonly IAwsS3Service _awsS3Service;
         private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly IUrlHelperFactory _urlHelperFactory;
+        private readonly IActionContextAccessor _actionContextAccessor;
 
-        public UserService(IUserRepository userRepository, ICartService cartService, SignInManager<AppUser> signInManager,
-            IMapper mapper, ITokenService tokenSerVice, IAwsS3Service awsS3Service, IEmailService emailService,
+        public UserService(IUserRepository userRepository, ICartService cartService, SignInManager<AppUser> signInManager, IActionContextAccessor actionContextAccessor,
+            IMapper mapper, ITokenService tokenSerVice, IAwsS3Service awsS3Service, IEmailService emailService, IUrlHelperFactory urlHelperFactory,
             UserManager<AppUser> userManager, IConfiguration config, DataContext context, RoleManager<IdentityRole> roleManager)
         {
             _userRepository = userRepository;
@@ -42,6 +47,8 @@ namespace MusicalStore.Application.Services.Implements
             _config = config;
             _context = context;
             _roleManager = roleManager;
+            _urlHelperFactory = urlHelperFactory;
+            _actionContextAccessor = actionContextAccessor;
         }
 
         public async Task<TokenResponse> Authentication(AuthenticationRequest request)
@@ -61,7 +68,14 @@ namespace MusicalStore.Application.Services.Implements
                 result.Message = $"The account is locked {user.LockoutEnd}";
                 return result;
             }
+            else if (!user.EmailConfirmed)
+            {
+                result.StatusCode = 400;
+                result.Message = "The account with emails have not been authenticated ";
+                return result;
+            }
 
+            // account bắt login bằng 2 bước xác thực
             if (user.TwoFactorEnabled)
             {
                 if (await _userManager.CheckPasswordAsync(user, request.Password))
@@ -210,10 +224,16 @@ namespace MusicalStore.Application.Services.Implements
 
             var findUserName = await _userRepository.GetUserByUsername(request.UserName);
             var findEmail = await _userRepository.GetUserByEmail(request.Email);
-            if (findUserName != null || findEmail != null)
+            if (findUserName != null)
             {
                 result.StatusCode = 400;
-                result.Message = "UserName or Email has been used";
+                result.Message = "UserName has been used";
+                return result;
+            }
+            else if (findEmail != null)
+            {
+                result.StatusCode = 400;
+                result.Message = "Email has been used";
                 return result;
             }
 
@@ -224,7 +244,7 @@ namespace MusicalStore.Application.Services.Implements
                 result.Message = "Can not find the role";
                 return result;
             }
- 
+
             var user = new AppUser();
             user.Id = Guid.NewGuid().ToString();
             user.UserName = request.UserName;
@@ -236,7 +256,12 @@ namespace MusicalStore.Application.Services.Implements
             user.DateCreated = DateTime.Now;
             user.CreateBy = request.CreateBy;
 
-            await _userRepository.CreateUser(user, request.PassWord);
+            var createUser = await _userRepository.CreateUser(user, request.PassWord);
+            if (!createUser)
+            {
+                result.Message = "Create User Fail.";
+                return result;
+            }
             if (request.Role == "Customer")
             {
                 roles.Add("Customer");
@@ -293,7 +318,7 @@ namespace MusicalStore.Application.Services.Implements
                 if (resetPassResult.Succeeded)
                 {
                     result.StatusCode = 200;
-                    result.Message = "Password has been changed";
+                    result.Message = "Change password success";
                 }
                 else
                 {
@@ -431,6 +456,54 @@ namespace MusicalStore.Application.Services.Implements
             }
         }
 
+        public async Task<ResponseMessage> SendEmailConfirm(string email)
+        {
+            ResponseMessage responseMessage = new();
+            if (email != "")
+            {
+                var user = await _userManager.FindByEmailAsync(email);
+                if (user != null)
+                {
+                    var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                    var result = await _userManager.ConfirmEmailAsync(user, token);
 
+                    var urlHelper = _urlHelperFactory.GetUrlHelper(_actionContextAccessor.ActionContext);
+                    var confirmationLink = urlHelper.Action(
+                         "ConfirmEmail",
+                         "User",
+                         new { token, email },
+                         _actionContextAccessor.ActionContext.HttpContext.Request.Scheme
+                     );
+
+                    var message = _emailService.ChangeToMessageEmail(
+                        email, "Email Confirmation Link",
+                        $"Please confirm your email by clicking the link: <a href='{confirmationLink}'>Confirm Email</a>"
+                    );
+                    var response = await _emailService.SendEmail(message);
+
+                    if (response.StatusCode == 200)
+                    {
+                        responseMessage.Message = "Send Email Success";
+                        responseMessage.StatusCode = 200;
+                    }
+                    else
+                    {
+                        responseMessage.Message = "Send Email Fail";
+                        responseMessage.StatusCode = 400;
+                    }
+                }
+                else
+                {
+                    responseMessage.Message = "No email found";
+                    responseMessage.StatusCode = 400;
+                }
+            }
+            else
+            {
+                responseMessage.Message = "Email is null";
+                responseMessage.StatusCode = 400;
+            }
+            return responseMessage;
+        }
     }
 }
